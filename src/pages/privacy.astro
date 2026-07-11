@@ -1,0 +1,121 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const lastUpdated = "2026-06-07";
+---
+
+<BaseLayout
+  title="プライバシーポリシー | まてた！ラーメンタイマー"
+  description="まてた！ラーメンタイマーのプライバシーポリシー。個人情報の収集は一切行いません。"
+>
+  <h1>プライバシーポリシー / Privacy Policy</h1>
+  <p class="subtitle">まてた！ラーメンタイマー (ramen-timer-mobile)</p>
+  <p>最終更新 / Last updated: {lastUpdated}</p>
+
+  <h2>日本語</h2>
+
+  <h3>1. 収集する情報</h3>
+  <p><strong>ラーメンタイマーは、利用者の個人情報を一切収集しません。</strong></p>
+  <p>
+    本アプリは完全にオフラインで動作するタイマーアプリです。氏名・メールアドレス・位置情報・連絡先・端末識別子などの個人情報、および利用状況・行動データを、収集・保存・外部送信することはありません。
+  </p>
+
+  <h3>2. 端末内に保存されるデータ</h3>
+  <p>
+    タイマーの設定値（分数・BGM
+    選択・ミュート・アニメーション強度・振動の
+    ON/OFF・実行中セッション）のみを、<strong
+      >利用者の端末内のローカルストレージにのみ</strong
+    >保存します。これらはアプリの使い勝手のために保持されるもので、外部のサーバーへ送信されることはなく、アプリを削除すると消去されます。
+  </p>
+
+  <h3>3. 権限の利用目的</h3>
+  <ul>
+    <li>
+      <strong>通知 (Notifications)</strong
+      >: タイマー完了をお知らせするためのローカル通知にのみ使用します。プッシュ通知サーバーは利用しません。
+    </li>
+    <li>
+      <strong>音声再生 (Audio playback)</strong
+      >: BGM・ファンファーレの再生にのみ使用します。<strong
+        >マイクによる録音は行いません</strong
+      >（録音権限 <code>RECORD_AUDIO</code> / マイク権限は要求しません）。
+    </li>
+  </ul>
+
+  <h3>4. 第三者への提供・トラッキング</h3>
+  <p>
+    第三者への情報提供、広告 SDK・解析
+    SDK の組み込み、トラッキングは<strong>一切行いません</strong
+    >。アプリ内課金・広告もありません。
+  </p>
+
+  <h3>5. 子どものプライバシー</h3>
+  <p>
+    本アプリは個人情報を収集しないため、子どもが利用しても個人情報が収集・送信されることはありません。米国
+    COPPA・その他の児童プライバシー関連法令の趣旨に沿って設計されています。
+  </p>
+
+  <h3>6. ポリシーの変更</h3>
+  <p>
+    本ポリシーを変更する場合は、本ページの内容と「最終更新」日を更新します。
+  </p>
+
+  <h3>7. お問い合わせ</h3>
+  <p>ご質問は以下までご連絡ください: <code>app@keroway.com</code></p>
+
+  <h2>English</h2>
+
+  <h3>1. Information We Collect</h3>
+  <p><strong>Ramen Timer does not collect any personal information.</strong></p>
+  <p>
+    The app is a fully offline timer. We do not collect, store, or transmit
+    any personal information (such as name, email, location, contacts, or
+    device identifiers) or any usage/behavioral data.
+  </p>
+
+  <h3>2. Data Stored on Your Device</h3>
+  <p>
+    Only timer preferences (minutes, BGM selection, mute, animation level,
+    haptics on/off, and the running session) are stored <strong
+      >locally on your device</strong
+    >. This data never leaves your device and is removed when you uninstall
+    the app.
+  </p>
+
+  <h3>3. Permissions</h3>
+  <ul>
+    <li>
+      <strong>Notifications</strong>: Used solely for a local notification
+      when the timer completes. No push notification server is used.
+    </li>
+    <li>
+      <strong>Audio playback</strong>: Used solely to play background music
+      and the fanfare. <strong>No audio is recorded</strong> (the app does not
+      request microphone / <code>RECORD_AUDIO</code> permission).
+    </li>
+  </ul>
+
+  <h3>4. Third Parties &amp; Tracking</h3>
+  <p>
+    We do not share any information with third parties and do not embed any
+    advertising or analytics SDKs. There is no tracking, no in-app purchases,
+    and no ads.
+  </p>
+
+  <h3>5. Children's Privacy</h3>
+  <p>
+    Because the app collects no personal information, no personal data is
+    collected or transmitted when children use it. The app is designed in
+    line with COPPA and similar children's privacy regulations.
+  </p>
+
+  <h3>6. Changes to This Policy</h3>
+  <p>
+    If this policy changes, we will update the content and the "Last
+    updated" date on this page.
+  </p>
+
+  <h3>7. Contact</h3>
+  <p>For any questions, contact: <code>app@keroway.com</code></p>
+</BaseLayout>

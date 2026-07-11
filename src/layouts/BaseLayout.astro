@@ -1,0 +1,37 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="/" style="text-decoration: none; color: inherit;">
+        <strong>まてた！ラーメンタイマー</strong>
+      </a>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>
+        &copy; {new Date().getFullYear()} keroway &mdash;
+        <a href="/">サポート</a> ・ <a href="/privacy">プライバシーポリシー</a>
+      </p>
+    </footer>
+  </body>
+</html>

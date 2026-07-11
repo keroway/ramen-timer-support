@@ -1,0 +1,21 @@
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor artifacts
+.vscode/
+.idea/
+
+# Astro build output and dependencies
+dist/
+node_modules/
+.astro/
+
+# Cloudflare Pages build cache
+.cache/
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
+# Claude Code agent memory (machine-generated, local-only)
+.claude/agent-memory/
