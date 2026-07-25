@@ -19,3 +19,14 @@ node_modules/
 
 # Claude Code agent memory (machine-generated, local-only)
 .claude/agent-memory/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+*.secret
+*.pem
+*.key
