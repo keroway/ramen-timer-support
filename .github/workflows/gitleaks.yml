@@ -10,6 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  # CLI 版はスキャンのみで PR コメントを出さないため contents: read で足りる。
   contents: read
 
 concurrency:
@@ -18,4 +19,4 @@ concurrency:
 
 jobs:
   gitleaks:
-    uses: keroway/.github/.github/workflows/reusable-gitleaks.yml@main
+    uses: keroway/.github/.github/workflows/reusable-gitleaks-cli.yml@main
