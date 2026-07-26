@@ -24,7 +24,7 @@ PR 前に `npm run lint && npm run check && npm run build` を通すこと（CI 
 
 ## ディレクトリ構成
 
-```
+```text
 src/
 ├── layouts/BaseLayout.astro   # 全ページ共通レイアウト（title/description は必須 props）
 ├── pages/                     # index.astro / privacy.astro / 404.astro の3枚のみ
