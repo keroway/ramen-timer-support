@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="ラーメン丼のアイコン">
+  <path d="M13 3c0 2-1.5 2-1.5 4M17 3c0 2-1.5 2-1.5 4M21 3c0 2-1.5 2-1.5 4"
+    fill="none" stroke="#d9480f" stroke-width="1.6" stroke-linecap="round" />
+  <path d="M4 15h24a12 12 0 0 1-24 0z" fill="#d9480f" />
+  <path d="M4 15h24a12 12 0 0 1-24 0z" fill="none" stroke="#d9480f" stroke-width="1.5" />
+  <rect x="3" y="13" width="26" height="2.4" rx="1.2" fill="#d9480f" />
+  <path d="M5 26h22" stroke="#d9480f" stroke-width="2" stroke-linecap="round" />
+</svg>

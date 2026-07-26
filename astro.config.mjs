@@ -7,6 +7,7 @@ export default defineConfig({
   compressHTML: true,
   build: {
     assets: "_astro",
+    inlineStylesheets: "never",
   },
   integrations: [sitemap()],
 });

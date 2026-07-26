@@ -1,10 +1,25 @@
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   --color-bg: #fff8f0;
   --color-fg: #2b1a12;
   --color-accent: #d9480f;
   --color-muted: #6b5a4d;
+  --color-surface: #ffffff;
+  --color-border: #f0e0d0;
+  --color-code-bg: #f3e7da;
   --max-width: 720px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1c1410;
+    --color-fg: #f3e6da;
+    --color-accent: #ff8a4c;
+    --color-muted: #b8a596;
+    --color-surface: #2a2019;
+    --color-border: #40312529;
+    --color-code-bg: #3a2c22;
+  }
 }
 
 * {
@@ -15,8 +30,14 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-fg);
-  font-family: "Hiragino Sans", "Yu Gothic", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Hiragino Sans",
+    "Yu Gothic",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   line-height: 1.7;
 }
 
@@ -30,6 +51,11 @@ header.site-header {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 1.5rem 1.25rem 0;
+}
+
+.site-header a {
+  text-decoration: none;
+  color: inherit;
 }
 
 h1 {
@@ -48,17 +74,45 @@ a {
   color: var(--color-accent);
 }
 
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .subtitle {
   color: var(--color-muted);
   margin-top: 0;
 }
 
 .card {
-  background: #fff;
-  border: 1px solid #f0e0d0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
   margin: 1.5rem 0;
+}
+
+.card h2 {
+  margin-top: 0;
+  border: none;
+  padding: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -3rem;
+  left: 1rem;
+  background: var(--color-accent);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 8px 8px;
+  z-index: 10;
+  transition: top 0.15s ease-in-out;
+}
+
+.skip-link:focus {
+  top: 0;
 }
 
 footer.site-footer {
@@ -70,7 +124,7 @@ footer.site-footer {
 }
 
 code {
-  background: #f3e7da;
+  background: var(--color-code-bg);
   padding: 0.1rem 0.35rem;
   border-radius: 4px;
 }

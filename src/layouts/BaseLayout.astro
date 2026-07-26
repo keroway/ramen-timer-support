@@ -4,9 +4,11 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description: string;
+  ogType?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, ogType = "website" } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
@@ -16,15 +18,26 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#fff8f0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1c1410" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="まてた！ラーメンタイマー" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta name="twitter:card" content="summary" />
   </head>
   <body>
+    <a href="#main" class="skip-link">本文へスキップ</a>
     <header class="site-header">
-      <a href="/" style="text-decoration: none; color: inherit;">
+      <a href="/">
         <strong>まてた！ラーメンタイマー</strong>
       </a>
     </header>
-    <main>
+    <main id="main">
       <slot />
     </main>
     <footer class="site-footer">
