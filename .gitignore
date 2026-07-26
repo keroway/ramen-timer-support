@@ -11,6 +11,9 @@ dist/
 node_modules/
 .astro/
 
+# Wrangler local state
+.wrangler/
+
 # Cloudflare Pages build cache
 .cache/
 

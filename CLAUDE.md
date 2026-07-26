@@ -12,15 +12,16 @@
 
 ```bash
 npm ci
-npm run dev      # 開発サーバー
-npm run build    # プロダクションビルド (astro build)
-npm run preview  # ビルド後プレビュー
-npm run check    # astro check（型・.astro の整合性チェック）
-npm run lint     # biome ci（*.ts / *.js / *.mjs / *.json のみ、フォーマット崩れも検出）
-npm run format   # biome format --write .
+npm run dev          # 開発サーバー
+npm run build        # プロダクションビルド (astro build)
+npm run preview      # ビルド後プレビュー
+npm run check        # astro check（型・.astro の整合性チェック）
+npm run lint         # biome ci（*.ts / *.js / *.mjs / *.json のみ、フォーマット崩れも検出）
+npm run format       # biome format --write . && prettier --write "**/*.{astro,css}"
+npm run format:check # format の内容を変更せず検証（CI で使用）
 ```
 
-PR 前に `npm run lint && npm run check && npm run build` を通すこと（CI と同じ）。
+PR 前に `npm run format:check && npm run check && npm run build` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。
 
 ## ディレクトリ構成
 
@@ -29,7 +30,10 @@ src/
 ├── layouts/BaseLayout.astro   # 全ページ共通レイアウト（title/description は必須 props）
 ├── pages/                     # index.astro / privacy.astro / 404.astro の3枚のみ
 └── styles/global.css          # 唯一のスタイルシート（BaseLayout が import）
-public/_headers                # Cloudflare Pages のセキュリティヘッダー（dist/_headers にコピーされる）
+public/
+├── _headers                   # Cloudflare Pages のセキュリティヘッダー（dist/_headers にコピーされる）
+├── favicon.svg                # サイトアイコン
+└── robots.txt                 # sitemap-index.xml を参照
 docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初期セットアップ手順
 ```
 
@@ -37,16 +41,18 @@ docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初�
 
 - ページ追加は `src/pages/*.astro` に `BaseLayout` を被せた 1 ファイルで完結させる。コンポーネント分割はしていない
 - CSS は `global.css` に集約する。コンポーネント単位・scoped スタイルは作らない
+- **インライン `style=` 属性は書かない。** `public/_headers` の CSP は `style-src 'self'`（`'unsafe-inline'` を許可していない）で、`astro.config.mjs` の `build.inlineStylesheets: "never"` と合わせて「CSS は必ず外部ファイル」という前提が成り立っている。スタイルが必要な場合は `global.css` にクラスを追加する
 - `public/_headers` の CSP は `script-src 'self'`（インラインスクリプト・外部 CDN 不可）。クライアント側 JS を追加する場合は `_headers` の見直しが必要
-- Biome の `files.includes` は `*.{ts,js,mjs,json}` のみ。**`.astro` / `.css` は Biome の対象外**で、`.astro` の正しさは `astro check` が担保する
-- `src/pages/privacy.astro` は日英併記の1ページ構成（日本語セクション・English セクションの見出しが1〜7で対応）。改訂時は**両言語 + 冒頭の `lastUpdated` 定数**を必ず更新する
-- `astro.config.mjs` の `site` は canonical URL と sitemap 生成のソース。ドメイン変更時はここを変更する
-- 依存パッケージは全て完全固定バージョン（`^` なし）。更新は意図的に行う
+- フォーマットは対象ファイルで分担する: Biome（`files.includes` は `*.{ts,js,mjs,json}` のみ）+ Prettier + `prettier-plugin-astro`（`*.astro` / `*.css`）。`.astro` の正しさ自体は `astro check` が担保する
+- `tsconfig.json` は `astro/tsconfigs/strict` を継承する。`src/env.d.ts` は不要（tsconfig の `include` に `.astro/types.d.ts` が入っていれば Astro 5 以降は自動生成される）
+- `src/pages/privacy.astro` は日英併記の1ページ構成（`<section lang="ja">` / `<section lang="en">` で分離し、見出しが1〜7で対応）。改訂時は**両言語 + 冒頭の `lastUpdated` 定数**を必ず更新する
+- `astro.config.mjs` の `site` は canonical URL・OGP `og:url`・sitemap 生成の共通ソース。ドメイン変更時はここを変更する
+- 依存パッケージは全て完全固定バージョン（`^` なし）。[Dependabot](.github/dependabot.yml) が更新提案を出すが、適用は意図的に行う
 - `.github/workflows/deploy.yml` の `--commit-message=${{ github.sha }}` は変更しない（Cloudflare Pages のデプロイ API が非 ASCII コミットメッセージを拒否するための回避）
 
 ## CI / デプロイ
 
-- PR: `ci.yml`（Biome lint + `astro check` + build）と `gitleaks.yml`（secret scan、org 共通の reusable workflow）
+- PR: `ci.yml`（Biome + Prettier のフォーマットチェック + `astro check` + build）と `gitleaks.yml`（secret scan、org 共通の reusable workflow）
 - `main` push: `deploy.yml` が build 後 `dist/` を Cloudflare Pages（`ramen-timer-support` プロジェクト）へ direct upload
 - 必要な GitHub Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
 - 初回セットアップ・カスタムドメイン設定は [`docs/cloudflare-pages-setup.md`](docs/cloudflare-pages-setup.md) を参照

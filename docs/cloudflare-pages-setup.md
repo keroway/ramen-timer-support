@@ -30,6 +30,7 @@
 
 ```bash
 npm ci
+npm run format:check
 npm run check
 npm run build
 npm run preview
