@@ -1,0 +1,26 @@
+# keroway 標準 lefthook 設定（テンプレ準拠、このリポジトリ向けに調整）。
+# https://lefthook.dev/configuration/
+# 導入は package.json の postinstall (`lefthook install`) で行う。
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome check (staged files)
+      glob: "*.{ts,js,mjs,json}"
+      run: npx biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+
+    - name: prettier (staged .astro / .css)
+      glob: "*.{astro,css}"
+      run: npx prettier --write {staged_files}
+      stage_fixed: true
+
+    - name: typecheck
+      glob: "*.{astro,ts}"
+      run: npx astro check
+
+pre-push:
+  jobs:
+    # ユニットテストはないため、format:check（biome ci + prettier --check）+ astro check の全通しで代替
+    - name: check
+      run: npm run format:check && npm run check
