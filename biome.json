@@ -10,7 +10,8 @@
       "!node_modules",
       "!.astro",
       "!.wrangler",
-      "!package-lock.json"
+      "!package-lock.json",
+      "!.claude"
     ]
   },
   "formatter": {
