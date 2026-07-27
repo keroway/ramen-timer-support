@@ -7,6 +7,7 @@
     "node": ">=24"
   },
   "scripts": {
+    "postinstall": "lefthook install",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@astrojs/check": "0.9.9",
     "@biomejs/biome": "2.5.5",
+    "lefthook": "2.1.10",
     "prettier": "3.9.6",
     "prettier-plugin-astro": "0.14.1",
     "typescript": "5.9.3",
