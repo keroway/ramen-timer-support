@@ -11,17 +11,17 @@
 ## コマンド
 
 ```bash
-npm ci
-npm run dev          # 開発サーバー
-npm run build        # プロダクションビルド (astro build)
-npm run preview      # ビルド後プレビュー
-npm run check        # astro check（型・.astro の整合性チェック）
-npm run lint         # biome ci（*.ts / *.js / *.mjs / *.json のみ、フォーマット崩れも検出）
-npm run format       # biome format --write . && prettier --write "**/*.{astro,css}"
-npm run format:check # format の内容を変更せず検証（CI で使用）
+pnpm install
+pnpm run dev          # 開発サーバー
+pnpm run build        # プロダクションビルド (astro build)
+pnpm run preview      # ビルド後プレビュー
+pnpm run check        # astro check（型・.astro の整合性チェック）
+pnpm run lint         # biome ci（*.ts / *.js / *.mjs / *.json のみ、フォーマット崩れも検出）
+pnpm run format       # biome format --write . && prettier --write "**/*.{astro,css}"
+pnpm run format:check # format の内容を変更せず検証（CI で使用）
 ```
 
-PR 前に `npm run format:check && npm run check && npm run build` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。
+PR 前に `pnpm run format:check && pnpm run check && pnpm run build` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。
 
 ## ディレクトリ構成
 

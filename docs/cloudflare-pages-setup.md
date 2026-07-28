@@ -19,7 +19,7 @@
 
 ## デプロイ
 
-`main` への push で `.github/workflows/deploy.yml` が `npm run build` を実行し、`dist/` を Pages にアップロードします。
+`main` への push で `.github/workflows/deploy.yml` が `pnpm run build` を実行し、`dist/` を Pages にアップロードします。
 
 デプロイ後の公開 URL:
 
@@ -29,11 +29,11 @@
 ## ローカル確認
 
 ```bash
-npm ci
-npm run format:check
-npm run check
-npm run build
-npm run preview
+pnpm install
+pnpm run format:check
+pnpm run check
+pnpm run build
+pnpm run preview
 ```
 
 `public/_headers` はビルド時に `dist/_headers` へコピーされ、Cloudflare Pages がセキュリティヘッダーとして適用します。
