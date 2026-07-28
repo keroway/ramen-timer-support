@@ -20,12 +20,15 @@ jobs:
         with:
           persist-credentials: false
       # push:branches:[main] のみでトリガーされ、PR 経由の未信頼コードは実行されないため誤検知。
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # zizmor: ignore[cache-poisoning] v6.0.9
+        with:
+          version: 11.17.0
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # zizmor: ignore[cache-poisoning] v7.0.0
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run build
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
       - uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

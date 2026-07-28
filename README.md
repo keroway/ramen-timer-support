@@ -22,24 +22,24 @@
 ## セットアップと開発
 
 ```bash
-npm ci
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 | コマンド | 内容 |
 |---|---|
-| `npm run dev` | 開発サーバーを起動 |
-| `npm run build` | プロダクションビルド（`astro build`、出力先は `dist/`） |
-| `npm run preview` | ビルド済み `dist/` をプレビュー |
-| `npm run check` | `astro check`（TypeScript・`.astro` の型/整合性チェック） |
-| `npm run lint` | `biome ci`（`*.ts` / `*.js` / `*.mjs` / `*.json` の Lint + フォーマット崩れ検出） |
-| `npm run format` | Biome + Prettier で全対象ファイルを整形 |
-| `npm run format:check` | `format` の内容を変更せずに検証（CI で使用） |
+| `pnpm run dev` | 開発サーバーを起動 |
+| `pnpm run build` | プロダクションビルド（`astro build`、出力先は `dist/`） |
+| `pnpm run preview` | ビルド済み `dist/` をプレビュー |
+| `pnpm run check` | `astro check`（TypeScript・`.astro` の型/整合性チェック） |
+| `pnpm run lint` | `biome ci`（`*.ts` / `*.js` / `*.mjs` / `*.json` の Lint + フォーマット崩れ検出） |
+| `pnpm run format` | Biome + Prettier で全対象ファイルを整形 |
+| `pnpm run format:check` | `format` の内容を変更せずに検証（CI で使用） |
 
 PR 前に次のコマンドを通すこと（CI と同じ）:
 
 ```bash
-npm run format:check && npm run check && npm run build
+pnpm run format:check && pnpm run check && pnpm run build
 ```
 
 ## ディレクトリ構成
