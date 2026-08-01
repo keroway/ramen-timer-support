@@ -176,10 +176,103 @@ button:focus-visible {
   margin: var(--space-four) 0;
 }
 
-.card h2 {
+.card h2,
+.card h3 {
   margin-top: 0;
   border: none;
   padding: 0;
+}
+
+.card-cta {
+  border-color: var(--color-accent-soft);
+}
+
+.cta-primary {
+  display: inline-block;
+  background: var(--color-accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: var(--space-two) var(--space-four);
+  border-radius: var(--radius-full);
+  transition: background-color var(--duration-base) ease;
+}
+
+.cta-primary:hover {
+  background: var(--color-accent-soft);
+}
+
+.cta-primary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.site-nav {
+  display: flex;
+  gap: var(--space-three);
+  margin-bottom: var(--space-two);
+}
+
+.site-nav a {
+  text-decoration: none;
+}
+
+.site-nav a[aria-current="page"] {
+  color: var(--color-fg);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-soft);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+details {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  margin: var(--space-three) 0;
+  overflow: hidden;
+}
+
+summary {
+  cursor: pointer;
+  padding: var(--space-three) var(--space-four);
+  font-weight: 600;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::after {
+  content: "+";
+  float: right;
+  color: var(--color-accent);
+  transition: transform var(--duration-base) ease;
+}
+
+details[open] summary::after {
+  transform: rotate(45deg);
+}
+
+details::details-content {
+  interpolate-size: allow-keywords;
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size var(--duration-base) ease,
+    content-visibility var(--duration-base) ease allow-discrete;
+}
+
+details[open]::details-content {
+  block-size: auto;
+}
+
+.faq-answer {
+  padding: 0 var(--space-four) var(--space-three);
+  margin: 0;
+  color: var(--color-muted);
 }
 
 .skip-link {

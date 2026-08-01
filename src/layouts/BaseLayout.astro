@@ -9,6 +9,7 @@ interface Props {
 
 const { title, description, ogType = "website" } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -41,10 +42,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       <slot />
     </main>
     <footer class="site-footer">
-      <p>
-        &copy; {new Date().getFullYear()} keroway &mdash;
-        <a href="/">サポート</a> ・ <a href="/privacy">プライバシーポリシー</a>
-      </p>
+      <nav aria-label="サイト内リンク" class="site-nav">
+        <a href="/" aria-current={currentPath === "/" ? "page" : undefined}>サポート</a>
+        <a href="/privacy" aria-current={currentPath === "/privacy" ? "page" : undefined}
+          >プライバシーポリシー</a
+        >
+      </nav>
+      <p>&copy; {new Date().getFullYear()} keroway</p>
     </footer>
   </body>
 </html>

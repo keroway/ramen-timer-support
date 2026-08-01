@@ -9,10 +9,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   <h1>まてた！ラーメンタイマー</h1>
   <p class="subtitle">カップ麺の完成を待つ、こどもと一緒に楽しめるタイマーアプリ</p>
 
-  <div class="card">
+  <div class="card card-cta">
     <h2>お問い合わせ</h2>
-    <p>ご質問・不具合報告・ご要望は以下のメールアドレスまでご連絡ください。</p>
-    <p><a href="mailto:app@keroway.com"><code>app@keroway.com</code></a></p>
+    <p>ご質問・不具合報告・ご要望は、以下のメールアドレスまでどうぞ。</p>
+    <p><a class="cta-primary" href="mailto:app@keroway.com">app@keroway.com へメールする</a></p>
   </div>
 
   <h2>このアプリについて</h2>
@@ -20,15 +20,26 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     「まてた！ラーメンタイマー」は、カップ麺の待ち時間を楽しく過ごすためのシンプルなタイマーアプリです。完全オフラインで動作し、個人情報の収集は一切行いません。
   </p>
 
+  <div class="card">
+    <h3>アプリを使ってみる</h3>
+    <p>
+      「まてた！ラーメンタイマー」は Web / モバイルアプリとしてご利用いただけます。公開先の URL
+      は準備中です。公開までもうしばらくお待ちください。
+    </p>
+    <!-- TODO(#20 依存): PWA / ストア公開後にリンクを追加する -->
+  </div>
+
   <h2>よくある質問</h2>
-  <p>
-    <strong>Q. 広告や課金はありますか？</strong><br />
-    A. ありません。無料でご利用いただけます。
-  </p>
-  <p>
-    <strong>Q. データはどこかに送信されますか？</strong><br />
-    A. されません。詳細は<a href="/privacy">プライバシーポリシー</a>をご覧ください。
-  </p>
+  <details>
+    <summary>広告や課金はありますか？</summary>
+    <p class="faq-answer">ありません。無料でご利用いただけます。</p>
+  </details>
+  <details>
+    <summary>データはどこかに送信されますか？</summary>
+    <p class="faq-answer">
+      されません。詳細は<a href="/privacy">プライバシーポリシー</a>をご覧ください。
+    </p>
+  </details>
 
   <h2>関連リンク</h2>
   <ul>
