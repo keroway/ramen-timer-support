@@ -9,7 +9,7 @@ interface Props {
 
 const { title, description, ogType = "website" } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const currentPath = Astro.url.pathname;
+const currentPath = Astro.url.pathname.replace(/(?!^)\/$/, "");
 ---
 
 <!doctype html>
