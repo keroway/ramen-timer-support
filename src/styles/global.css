@@ -44,6 +44,10 @@
   --font-size-h1: clamp(1.75rem, 1.5rem + 1.2vw, 2.25rem);
 
   --max-width: 720px;
+
+  /* noodle illustration (404) */
+  --color-noodle: #fff8c7;
+  --color-noodle-shadow: #ffeaa2;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -307,4 +311,65 @@ code {
   background: var(--color-code-bg);
   padding: var(--space-half) var(--space-one);
   border-radius: var(--radius-xs);
+}
+
+.noodle-scene {
+  display: flex;
+  justify-content: center;
+  margin: var(--space-five) 0 var(--space-four);
+}
+
+.noodle-illustration {
+  width: min(220px, 60vw);
+  height: auto;
+}
+
+.noodle-bowl {
+  fill: var(--color-surface);
+  stroke: var(--color-accent);
+  stroke-width: 3;
+}
+
+.noodle-bowl-rim {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 3;
+}
+
+.noodle-strand {
+  fill: none;
+  stroke: var(--color-noodle);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: noodle-droop 900ms var(--ease-spring) both;
+}
+
+.noodle-strand-2 {
+  stroke: var(--color-noodle-shadow);
+  animation-delay: 150ms;
+}
+
+.noodle-strand-3 {
+  animation-delay: 300ms;
+}
+
+@keyframes noodle-droop {
+  from {
+    transform: scaleY(0.25);
+    opacity: 0;
+  }
+  60% {
+    transform: scaleY(1.08);
+    opacity: 1;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.noodle-actions {
+  text-align: center;
 }
