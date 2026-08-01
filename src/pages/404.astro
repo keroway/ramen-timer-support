@@ -4,8 +4,29 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <BaseLayout
   title="ページが見つかりません | まてた！ラーメンタイマー"
-  description="お探しのページは見つかりませんでした。"
+  description="お探しのページは見つかりませんでした。麺がのびてしまったようです。"
 >
-  <h1>404 — ページが見つかりません</h1>
-  <p><a href="/">トップページに戻る</a></p>
+  <div class="noodle-scene" aria-hidden="true">
+    <svg class="noodle-illustration" viewBox="0 0 120 110">
+      <path class="noodle-strand noodle-strand-1" d="M45 46 Q40 78 43 104"></path>
+      <path class="noodle-strand noodle-strand-2" d="M60 44 Q65 82 58 106"></path>
+      <path class="noodle-strand noodle-strand-3" d="M75 46 Q81 76 74 100"></path>
+      <path class="noodle-bowl" d="M18 52 Q18 88 60 88 Q102 88 102 52 Z"></path>
+      <ellipse class="noodle-bowl-rim" cx="60" cy="52" rx="44" ry="9"></ellipse>
+    </svg>
+  </div>
+
+  <h1>あれ、麺がのびちゃった…</h1>
+  <p>お探しのページが見つかりませんでした。放っておいたら、すっかりのびてしまったようです。</p>
+
+  <p class="noodle-actions">
+    <a href="/">トップページに戻る</a> ・ <a href="/privacy">プライバシーポリシーを見る</a>
+  </p>
+
+  <details>
+    <summary>丼の底をのぞいてみる</summary>
+    <p class="faq-answer">
+      …まだのびていないラーメンが、ここにいます。次はタイマーで待っていてあげてください。
+    </p>
+  </details>
 </BaseLayout>
