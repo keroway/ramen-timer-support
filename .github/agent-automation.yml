@@ -1,0 +1,9 @@
+# Explicit repository-level opt-in for the project-local Issue delivery loop.
+# The issue-sprint skill validates this file before changing GitHub state.
+enabled: true
+
+# One Issue per cycle is the maximum permitted by the shared lock contract.
+max_issues_per_cycle: 1
+
+# /impl-issues merge may squash-merge only after its CI, review, and protection gates pass.
+allow_merge: true
