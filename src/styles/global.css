@@ -373,3 +373,14 @@ code {
 .noodle-actions {
   text-align: center;
 }
+
+.ramen-hero {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 var(--space-four);
+}
+
+.ramen-hero-illustration {
+  width: min(160px, 45vw);
+  height: auto;
+}
