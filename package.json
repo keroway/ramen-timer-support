@@ -16,7 +16,7 @@
     "lint": "biome ci",
     "format": "biome format --write . && prettier --write \"**/*.{astro,css}\"",
     "format:check": "biome ci && prettier --check \"**/*.{astro,css}\"",
-    "generate:og-image": "npx --yes sharp-cli -i assets/og-image.svg -o public -f png resize 1200 630"
+    "generate:og-image": "npx --yes sharp-cli@5.2.0 -i assets/og-image.svg -o public -f png resize 1200 630"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.3",
