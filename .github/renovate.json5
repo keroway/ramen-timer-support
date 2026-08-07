@@ -27,5 +27,11 @@
     // - Astro / フレームワーク本体のような lockstep 依存: groupName で束ねる
     //   （keroway/astro-blog の astrojs グループを参照）
     // - major を自動更新させたくない依存: matchPackageNames + matchUpdateTypes: ["major"] + enabled: false
+    {
+      description: "typescript major を hold: @astrojs/check@0.9.9 -> @astrojs/language-server -> @volar/kit の peerDependencies が typescript@\"^5.0.0 || ^6.0.0\" までしか許容せず、7.x へ上げると npm ci が ERESOLVE で失敗する（#30, 孤児 dependabot PR #7 で確認）。@astrojs/check 側が 7.x に対応したら外す。",
+      matchPackageNames: ["typescript"],
+      matchUpdateTypes: ["major"],
+      enabled: false,
+    },
   ],
 }
