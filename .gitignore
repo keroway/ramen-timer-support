@@ -33,3 +33,6 @@ node_modules/
 *.secret
 *.pem
 *.key
+
+# Codex プラグインのローカル生成物(絶対パスを含む個人ローカル層)
+.codex/
