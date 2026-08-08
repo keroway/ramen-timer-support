@@ -28,6 +28,16 @@ file="$(extract_file_path "$payload")"
 [ -z "$file" ] && exit 0
 [ -f "$file" ] || exit 0
 
+# シンボリックリンクや `..` を解決してから境界チェックする（realpath が
+# 無い環境向けに `cd ... && pwd -P` へフォールバック）。
+if command -v realpath >/dev/null 2>&1; then
+  file="$(realpath "$file" 2>/dev/null)" || exit 0
+else
+  dir="$(cd "$(dirname "$file")" >/dev/null 2>&1 && pwd -P)" || exit 0
+  file="${dir}/$(basename "$file")"
+fi
+[ -f "$file" ] || exit 0
+
 case "$file" in
   "${PROJECT_ROOT}"/*) ;;
   *) exit 0 ;;
