@@ -2,3 +2,24 @@ allowBuilds:
   esbuild: true
   lefthook: true
   workerd: true
+
+# osv-scanner が検出した脆弱性のうち、親パッケージの範囲指定に阻まれて上がらないものを
+# 強制的に引き上げる (#42)。いずれも直接依存ではなく、公開される静的アセットにも載らないが、
+# CI の osv-scan を green に保つために固定する。
+# package.json が全依存 exact pin のため、依存元の更新を待つと動かせない事情もある。
+# 上限 (<major+1) は必須。付けないと major を飛び越える (keroway/code-tactics-lp#139 で実測)。
+# upstream が修正版を取り込んだら該当行を削除する。
+overrides:
+  # GHSA-7p8r-x3mc-p8w7 (fast-uri <3.1.5) — backslash authority introducer による host confusion。
+  # ajv > yaml-language-server > @astrojs/language-server > @astrojs/check 経由 (型チェック時のみ)。
+  "fast-uri@<3.1.5": ">=3.1.5 <4"
+  # GHSA-5p4m-2wfm-xmqj (js-yaml <4.3.1) — !!omap 解決の二次計算量 DoS。
+  # @astrojs/internal-helpers > astro 経由 (SSG のビルド時に自リポジトリのコンテンツを読むだけ)。
+  "js-yaml@>=4.0.0 <4.3.1": ">=4.3.1 <5"
+  # GHSA-2v37-7h3g-55p8 (nanoid <3.3.17) — size=0 で customAlphabet / customRandom が
+  # 無限ループする。postcss (ソースマップ用 ID 生成、size は固定) > vite > astro 経由。
+  # advisory の影響範囲が 2026-08-08 に 3.3.16 まで拡大されたため追加。
+  "nanoid@>=3.0.0 <3.3.17": ">=3.3.17 <4"
+  # GHSA-4cwx-7wf7-3272 ほか計 4 件 (undici <7.29.0)。
+  # wrangler のローカル実行ランタイム miniflare 経由 (デプロイ成果物には含まれない)。
+  "undici@<7.29.0": ">=7.29.0 <8"
