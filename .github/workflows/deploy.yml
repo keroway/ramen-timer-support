@@ -35,3 +35,37 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           # Pages rejects non-ASCII commit messages in its deployment API.
           command: pages deploy dist --project-name=ramen-timer-support --commit-hash=${{ github.sha }} --commit-message=${{ github.sha }}
+
+      # デプロイが success でも配信が壊れるケース（ビルド成果物が空、DNS/ルーティングの
+      # 破損など）を検知する。このサイトが配信する /privacy/ は App Store Connect と
+      # Google Play Console の両方に登録するプライバシーポリシー URL であり
+      # (keroway/ramen-timer-mobile#130)、404 を返すと審査差し戻しの理由になる。
+      #
+      # 対象は**ストアが参照する 2 URL に限る**。サイト全体のリンクチェックは別の関心事。
+      # 末尾スラッシュ付きで確認する（スラッシュなしは 308 リダイレクトされる）。
+      #
+      # Pages の反映には時間差があるため、初回 404 で落とさず 6 回まで 10 秒間隔で待つ
+      # （最大 60 秒）。concurrency で次のデプロイが詰まるため、これ以上は待たない。
+      - name: Verify deployed URLs
+        run: |
+          set -euo pipefail
+          urls=(
+            "https://ramentimer.keroway.com/"
+            "https://ramentimer.keroway.com/privacy/"
+          )
+          for url in "${urls[@]}"; do
+            code=""
+            for attempt in $(seq 1 6); do
+              code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "$url" || echo 000)"
+              if [ "$code" = "200" ]; then
+                echo "ok: $url ($code, attempt $attempt)"
+                break
+              fi
+              echo "retry $attempt/6: $url -> $code"
+              sleep 10
+            done
+            if [ "$code" != "200" ]; then
+              echo "::error::$url returned $code (expected 200)"
+              exit 1
+            fi
+          done
