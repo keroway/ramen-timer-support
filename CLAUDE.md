@@ -47,7 +47,7 @@ docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初�
 - `tsconfig.json` は `astro/tsconfigs/strict` を継承する。`src/env.d.ts` は不要（tsconfig の `include` に `.astro/types.d.ts` が入っていれば Astro 5 以降は自動生成される）
 - `src/pages/privacy.astro` は日英併記の1ページ構成（`<section lang="ja">` / `<section lang="en">` で分離し、見出しが1〜7で対応）。改訂時は**両言語 + 冒頭の `lastUpdated` 定数**を必ず更新する
 - `astro.config.mjs` の `site` は canonical URL・OGP `og:url`・sitemap 生成の共通ソース。ドメイン変更時はここを変更する
-- 依存パッケージは全て完全固定バージョン（`^` なし）。[Dependabot](.github/dependabot.yml) が更新提案を出すが、適用は意図的に行う
+- 依存パッケージは全て完全固定バージョン（`^` なし）。[Renovate](.github/renovate.json5) が更新提案を出すが、適用は意図的に行う（Dependabot からは移行済みで `.github/dependabot.yml` は無い）。`typescript` の major は `@astrojs/check` の peerDependencies 制約により `enabled: false` で止めてある（#30）
 - `.github/workflows/deploy.yml` の `--commit-message=${{ github.sha }}` は変更しない（Cloudflare Pages のデプロイ API が非 ASCII コミットメッセージを拒否するための回避）
 
 ## CI / デプロイ
