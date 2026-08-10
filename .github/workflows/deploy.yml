@@ -53,6 +53,7 @@ jobs:
             "https://ramentimer.keroway.com/"
             "https://ramentimer.keroway.com/privacy/"
           )
+          failed=0
           for url in "${urls[@]}"; do
             code=""
             for attempt in $(seq 1 6); do
@@ -62,10 +63,13 @@ jobs:
                 break
               fi
               echo "retry $attempt/6: $url -> $code"
-              sleep 10
+              # 最終試行の後は待たない（次が無いので失敗通知を遅らせるだけ）。
+              [ "$attempt" -lt 6 ] && sleep 10
             done
             if [ "$code" != "200" ]; then
+              # ここで exit すると 2 つ目の URL が確認されない。両方見てから落とす。
               echo "::error::$url returned $code (expected 200)"
-              exit 1
+              failed=1
             fi
           done
+          exit "$failed"
