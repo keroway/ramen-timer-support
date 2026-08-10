@@ -17,7 +17,7 @@
 | ホスティング | Cloudflare Pages（Direct Upload） |
 | Node バージョン | [`.nvmrc`](.nvmrc) を参照（CI・ローカルとも同じソースを使用） |
 
-依存パッケージは全て完全固定バージョン（`^` なし）で管理し、[Dependabot](.github/dependabot.yml) が更新を検知します。
+依存パッケージは全て完全固定バージョン（`^` なし）で管理し、[Renovate](.github/renovate.json5) が更新を検知します。
 
 ## セットアップと開発
 
@@ -62,7 +62,9 @@ docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初�
 
 - Pull request: [`ci.yml`](.github/workflows/ci.yml)（Biome + Prettier のフォーマットチェック、`astro check`、build）、[`gitleaks.yml`](.github/workflows/gitleaks.yml)（secret scan、org 共通の reusable workflow）
 - `main` への push: [`deploy.yml`](.github/workflows/deploy.yml) が build 後、Cloudflare Pages（`ramen-timer-support` プロジェクト）へ direct upload
-- 依存関係の更新提案: [`dependabot.yml`](.github/dependabot.yml)（npm / GitHub Actions、週次）
+- 依存関係の更新提案: [`renovate.json5`](.github/renovate.json5)（npm / GitHub Actions、週次。minor / patch はグループ化、major は個別 PR）。
+  ただし Renovate は現在 silent mode で動いており PR も Dependency Dashboard も出ない
+- 脆弱性由来の更新: Dependabot security updates（リポジトリ設定側の機能で `.github/dependabot.yml` は不要）
 - デプロイ先: <https://ramentimer.keroway.com>
 
 初回セットアップ・カスタムドメイン設定は [docs/cloudflare-pages-setup.md](docs/cloudflare-pages-setup.md) を参照してください。
