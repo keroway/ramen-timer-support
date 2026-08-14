@@ -1,3 +1,9 @@
+# サプライチェーン保護水準をワークスペース全体で統一 (agent-assets#171、2026-08-14決定)。
+# pnpm 11 既定の minimumReleaseAge (1440分=1日) を 3日 (4320分) に固定し、
+# 制約を満たすバージョンが無いときに resolve を失敗させる minimumReleaseAgeStrict も有効化する。
+minimumReleaseAge: 4320
+minimumReleaseAgeStrict: true
+
 allowBuilds:
   esbuild: true
   lefthook: true
