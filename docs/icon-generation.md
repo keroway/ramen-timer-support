@@ -15,7 +15,7 @@
 2. 以下のコマンドで `public/apple-touch-icon.png` (180x180) を生成する。
 
 ```bash
-npx sharp-cli resize 180 180 \
+npx --yes sharp-cli@5.2.0 resize 180 180 \
   --input docs/apple-touch-icon-source.svg \
   --output public/apple-touch-icon.png
 ```
