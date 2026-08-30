@@ -33,6 +33,7 @@ pnpm install
 pnpm run format:check
 pnpm run check
 pnpm run build
+pnpm run a11y
 pnpm run preview
 ```
 
