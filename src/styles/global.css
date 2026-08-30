@@ -10,6 +10,9 @@
   --color-code-bg: #f3e7da;
   --color-accent: #8b3d1a;
   --color-accent-soft: #d9743e;
+  /* 白文字を重ねるボタン/スキップリンクの背景専用トークン(WCAG AA 4.5:1 を担保する) */
+  --color-cta-bg: var(--color-accent);
+  --color-cta-bg-hover: var(--color-accent-soft);
 
   /* spacing (アプリ本体 Expo 版 theme.ts の刻みに合わせる) */
   --space-half: 0.125rem;
@@ -60,6 +63,9 @@
     --color-code-bg: #3a2c22;
     --color-accent: #ff8a4c;
     --color-accent-soft: #ff8a4c;
+    /* #fff on #ff8a4c は 2.33:1 で AA 未達のため、白文字用の背景は別途濃い値を使う */
+    --color-cta-bg: #a8461a;
+    --color-cta-bg-hover: #b8511f;
     --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
   }
 }
@@ -203,7 +209,7 @@ button:focus-visible {
 
 .cta-primary {
   display: inline-block;
-  background: var(--color-accent);
+  background: var(--color-cta-bg);
   color: #fff;
   text-decoration: none;
   font-weight: 600;
@@ -213,7 +219,7 @@ button:focus-visible {
 }
 
 .cta-primary:hover {
-  background: var(--color-accent-soft);
+  background: var(--color-cta-bg-hover);
 }
 
 .cta-primary:focus-visible {
@@ -293,7 +299,7 @@ details[open]::details-content {
   position: absolute;
   top: -3rem;
   left: var(--space-three);
-  background: var(--color-accent);
+  background: var(--color-cta-bg);
   color: #fff;
   padding: var(--space-two) var(--space-three);
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
