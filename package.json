@@ -16,6 +16,7 @@
     "lint": "biome ci",
     "format": "biome format --write . && prettier --write \"**/*.{astro,css}\"",
     "format:check": "biome ci && prettier --check \"**/*.{astro,css}\"",
+    "a11y": "html-validate \"dist/**/*.html\"",
     "generate:og-image": "npx --yes sharp-cli@5.2.0 -i assets/og-image.svg -o public -f png resize 1200 630"
   },
   "dependencies": {
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@astrojs/check": "0.9.9",
     "@biomejs/biome": "2.5.5",
+    "html-validate": "11.10.0",
     "lefthook": "2.1.10",
     "prettier": "3.9.6",
     "prettier-plugin-astro": "0.14.1",
