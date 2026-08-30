@@ -19,9 +19,10 @@ pnpm run check        # astro check（型・.astro の整合性チェック）
 pnpm run lint         # biome ci（*.ts / *.js / *.mjs / *.json のみ、フォーマット崩れも検出）
 pnpm run format       # biome format --write . && prettier --write "**/*.{astro,css}"
 pnpm run format:check # format の内容を変更せず検証（CI で使用）
+pnpm run a11y         # html-validate "dist/**/*.html"（アクセシビリティ回帰の検知。build 後の dist/ が対象）
 ```
 
-PR 前に `pnpm run format:check && pnpm run check && pnpm run build` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。
+PR 前に `pnpm run format:check && pnpm run check && pnpm run build && pnpm run a11y` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。
 
 ## ディレクトリ構成
 
@@ -52,7 +53,7 @@ docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初�
 
 ## CI / デプロイ
 
-- PR: `ci.yml`（Biome + Prettier のフォーマットチェック + `astro check` + build）と `gitleaks.yml`（secret scan、org 共通の reusable workflow）
+- PR: `ci.yml`（Biome + Prettier のフォーマットチェック + `astro check` + build + `pnpm run a11y`（`html-validate` によるアクセシビリティ回帰チェック））と `gitleaks.yml`（secret scan、org 共通の reusable workflow）
 - `main` push: `deploy.yml` が build 後 `dist/` を Cloudflare Pages（`ramen-timer-support` プロジェクト）へ direct upload
 - 必要な GitHub Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
 - 初回セットアップ・カスタムドメイン設定は [`docs/cloudflare-pages-setup.md`](docs/cloudflare-pages-setup.md) を参照
