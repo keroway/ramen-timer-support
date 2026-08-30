@@ -6,9 +6,16 @@ interface Props {
   description: string;
   ogType?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
-const { title, description, ogType = "website", ogImage = "/og-image.png" } = Astro.props;
+const {
+  title,
+  description,
+  ogType = "website",
+  ogImage = "/og-image.png",
+  noindex = false,
+} = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL(ogImage, Astro.site);
 const currentPath = Astro.url.pathname.replace(/(?!^)\/$/, "");
@@ -21,7 +28,8 @@ const currentPath = Astro.url.pathname.replace(/(?!^)\/$/, "");
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalURL} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && <link rel="canonical" href={canonicalURL} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <meta name="theme-color" content="#fff7e8" media="(prefers-color-scheme: light)" />
@@ -29,7 +37,7 @@ const currentPath = Astro.url.pathname.replace(/(?!^)\/$/, "");
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalURL} />
+    {!noindex && <meta property="og:url" content={canonicalURL} />}
     <meta property="og:site_name" content="まてた！ラーメンタイマー" />
     <meta property="og:locale" content="ja_JP" />
     <meta property="og:image" content={ogImageURL} />
