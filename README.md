@@ -35,11 +35,12 @@ pnpm run dev
 | `pnpm run lint` | `biome ci`（`*.ts` / `*.js` / `*.mjs` / `*.json` の Lint + フォーマット崩れ検出） |
 | `pnpm run format` | Biome + Prettier で全対象ファイルを整形 |
 | `pnpm run format:check` | `format` の内容を変更せずに検証（CI で使用） |
+| `pnpm run a11y` | `html-validate` で `dist/**/*.html` のアクセシビリティ回帰を検知（`build` 後の `dist/` が対象） |
 
 PR 前に次のコマンドを通すこと（CI と同じ）:
 
 ```bash
-pnpm run format:check && pnpm run check && pnpm run build
+pnpm run format:check && pnpm run check && pnpm run build && pnpm run a11y
 ```
 
 ## ディレクトリ構成
@@ -60,7 +61,7 @@ docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初�
 
 ## CI / デプロイ
 
-- Pull request: [`ci.yml`](.github/workflows/ci.yml)（Biome + Prettier のフォーマットチェック、`astro check`、build）、[`gitleaks.yml`](.github/workflows/gitleaks.yml)（secret scan、org 共通の reusable workflow）
+- Pull request: [`ci.yml`](.github/workflows/ci.yml)（Biome + Prettier のフォーマットチェック、`astro check`、build、`pnpm run a11y`（`html-validate` によるアクセシビリティ回帰チェック））、[`gitleaks.yml`](.github/workflows/gitleaks.yml)（secret scan、org 共通の reusable workflow）
 - `main` への push: [`deploy.yml`](.github/workflows/deploy.yml) が build 後、Cloudflare Pages（`ramen-timer-support` プロジェクト）へ direct upload
 - 依存関係の更新提案: [`renovate.json5`](.github/renovate.json5)（npm / GitHub Actions、週次。minor / patch はグループ化、major は個別 PR）。
   ただし Renovate は現在 silent mode で動いており PR も Dependency Dashboard も出ない
