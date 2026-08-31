@@ -20,6 +20,7 @@ pnpm run lint         # biome ci（*.ts / *.js / *.mjs / *.json のみ、フォ�
 pnpm run format       # biome format --write . && prettier --write "**/*.{astro,css}"
 pnpm run format:check # format の内容を変更せず検証（CI で使用）
 pnpm run a11y         # html-validate "dist/**/*.html"（アクセシビリティ回帰の検知。build 後の dist/ が対象）
+pnpm run generate:og-image # assets/og-image.svg から public/og-image.png (1200x630) を生成
 ```
 
 PR 前に `pnpm run format:check && pnpm run check && pnpm run build && pnpm run a11y` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。
