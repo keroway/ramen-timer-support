@@ -36,6 +36,7 @@ pnpm run dev
 | `pnpm run format` | Biome + Prettier で全対象ファイルを整形 |
 | `pnpm run format:check` | `format` の内容を変更せずに検証（CI で使用） |
 | `pnpm run a11y` | `html-validate` で `dist/**/*.html` のアクセシビリティ回帰を検知（`build` 後の `dist/` が対象） |
+| `pnpm run generate:og-image` | `assets/og-image.svg` から `public/og-image.png`（1200x630）を生成 |
 
 PR 前に次のコマンドを通すこと（CI と同じ）:
 
