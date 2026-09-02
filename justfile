@@ -7,7 +7,8 @@ build:
     pnpm run build
 
 test:
-    @echo "test スクリプトは未整備（e2e/unit テストなし。astro check (typecheck) は 'just check' 参照）"
+    @echo "test スクリプトは未整備（e2e/unit テストなし。astro check (typecheck) は 'just check' 参照）" >&2
+    @exit 1
 
 lint:
     pnpm run lint
