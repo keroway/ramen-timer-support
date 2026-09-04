@@ -16,9 +16,11 @@ allowBuilds:
 # 上限 (<major+1) は必須。付けないと major を飛び越える (keroway/code-tactics-lp#139 で実測)。
 # upstream が修正版を取り込んだら該当行を削除する。
 overrides:
-  # GHSA-7p8r-x3mc-p8w7 (fast-uri <3.1.5) — backslash authority introducer による host confusion。
+  # GHSA-5jgf-p345-68v8 ほか計 4 件 (fast-uri <3.1.6) —
+  # resolve() が scheme-relative な参照のホストを IDN 正規化せず返すため、
+  # host confusion (ポリシー判定と実際の遷移先の不一致) を招く。
   # ajv > yaml-language-server > @astrojs/language-server > @astrojs/check 経由 (型チェック時のみ)。
-  "fast-uri@<3.1.5": ">=3.1.5 <4"
+  "fast-uri@<3.1.6": ">=3.1.6 <4"
   # GHSA-5p4m-2wfm-xmqj (js-yaml <4.3.1) — !!omap 解決の二次計算量 DoS。
   # @astrojs/internal-helpers > astro 経由 (SSG のビルド時に自リポジトリのコンテンツを読むだけ)。
   "js-yaml@>=4.0.0 <4.3.1": ">=4.3.1 <5"
