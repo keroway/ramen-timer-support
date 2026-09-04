@@ -57,7 +57,22 @@ fi
 # 上記どちらも取れない場合（origin未設定・履歴が浅い等）は committed_diff は空のまま。
 
 # 未コミット分（staged/unstaged/untracked）は差分スコープが取れた場合も常に合算する。
-uncommitted_diff="$(git status --porcelain --untracked-files=all 2>/dev/null | awk '{print $2}' || true)"
+# -z（NUL区切り）で取得し、空白を含むパスを壊さず取り出す。rename/copy はパスが
+# 2件（新パス→旧パス）続けて出力されるため、旧パスはスキップする。
+uncommitted_diff=""
+skip_next=false
+while IFS= read -r -d '' entry; do
+  if [ "$skip_next" = "true" ]; then
+    skip_next=false
+    continue
+  fi
+  status="${entry:0:2}"
+  path="${entry:3}"
+  case "$status" in
+  R* | C*) skip_next=true ;;
+  esac
+  uncommitted_diff="${uncommitted_diff}${path}"$'\n'
+done < <(git status --porcelain --untracked-files=all -z 2>/dev/null)
 
 changed_files="$(printf '%s\n%s\n' "$committed_diff" "$uncommitted_diff" | sed '/^$/d' | sort -u)"
 
@@ -69,6 +84,7 @@ fi
 # --- 影響領域の判定（拡張子ベースでスコープを絞る） --------------------------
 run_biome=false
 run_astro=false
+run_prettier=false
 while IFS= read -r f; do
   [ -z "$f" ] && continue
   case "$f" in
@@ -76,6 +92,9 @@ while IFS= read -r f; do
   esac
   case "$f" in
   *.astro | *.ts) run_astro=true ;;
+  esac
+  case "$f" in
+  *.astro | *.css) run_prettier=true ;;
   esac
 done <<CHANGED
 $changed_files
@@ -107,6 +126,14 @@ if [ "$run_astro" = "true" ]; then
   if ! run_with_timeout 90 pnpm run check >"${log_dir}/check.log" 2>&1; then
     echo "post-stop-check: pnpm run check（astro check）が失敗しました" >&2
     cat "${log_dir}/check.log" >&2
+    fail=1
+  fi
+fi
+
+if [ "$run_prettier" = "true" ]; then
+  if ! run_with_timeout 30 pnpm exec prettier --check "**/*.{astro,css}" >"${log_dir}/prettier.log" 2>&1; then
+    echo "post-stop-check: prettier --check（astro/css）が失敗しました" >&2
+    cat "${log_dir}/prettier.log" >&2
     fail=1
   fi
 fi
