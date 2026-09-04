@@ -1,9 +1,41 @@
-# Explicit repository-level opt-in for the project-local Issue delivery loop.
-# The issue-sprint skill validates this file before changing GitHub state.
+# Explicit repository-level opt-in for shared Issue automation.
+# Copy to .github/agent-automation.yml and review before changing enabled.
+#
+# 読まれるフィールドはこの 6 つだけ（#184, #290）。増やすときは、**読む側を
+# 同時に書く**こと。読まれない設定は「効いているつもり」を作るだけで、
+# 実際には何も変えない。
+#
+#   enabled              cron / worktree 生成の opt-in 判定
+#                        （cron-repo-cycle.sh / ensure-worker-worktrees.sh）
+#   allow_merge          issue-sprint がマージしてよいか
+#   max_issues_per_cycle 1 サイクルで扱う issue 数の上限
+#   allow_codex_implementation Codex に issue **実装**（sprint）を委譲してよいか
+#   allow_codex_triage   Codex に**起票のみ**のモード（discover /
+#                        plans-to-issue）を委譲してよいか。**既定は許可**で、
+#                        `false` と明示したときだけ拒否する。ci-triage は
+#                        対象外（#315、Codex サンドボックスから GitHub API に
+#                        届かず Claude 固定）
+#   extra_exclusion_labels     無人ループの除外ラベルにこのリポジトリ固有の
+#                              ラベルを足す（repo-probe.sh / scheduled-issue-sprint.sh）
+#
+# 実行間隔はここでは決まらない。横断ループのペースは Claude の利用枠の
+# 残量から決める（workspace-self-improve skill / claude-usage.sh）。
+# cron の起動間隔は launchd の設定側にある。
 enabled: true
-
-# One Issue per cycle is the maximum permitted by the shared lock contract.
-max_issues_per_cycle: 1
-
-# /impl-issues merge may squash-merge only after its CI, review, and protection gates pass.
 allow_merge: true
+max_issues_per_cycle: 1
+allow_codex_implementation: false
+
+# 起票のみのモード（discover / plans-to-issue）を Codex へ委譲するか。
+# 実装・commit・PR を作らないので既定は許可（このキーを省略 = 許可）。
+# Codex にリポジトリの中身を読ませたくない場合だけ `false` と書く。
+# ci-triage はこのキーに関わらず常に Claude 固定（#315）。
+allow_codex_triage: true
+
+# 無人ループが着手対象から外すラベルのうち、このリポジトリ固有の追加分（#290）。
+# 共通の canonical 6 件（needs-refinement / blocked / in-progress / needs-human /
+# needs-triage / needs-info）は常に除外されるので、ここには書かない。
+# 例: epic（親 issue を束ねるだけで直接実装しない）、
+#     deferred（着手時期が来ていない後続マイルストーン）。
+# キーごと省略してよい（その場合は canonical 6 件のみ）。
+extra_exclusion_labels: []
