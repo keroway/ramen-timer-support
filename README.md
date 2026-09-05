@@ -64,8 +64,7 @@ docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初�
 
 - Pull request: [`ci.yml`](.github/workflows/ci.yml)（Biome + Prettier のフォーマットチェック、`astro check`、build、`pnpm run a11y`（`html-validate` によるアクセシビリティ回帰チェック））、[`gitleaks.yml`](.github/workflows/gitleaks.yml)（secret scan、org 共通の reusable workflow）
 - `main` への push: [`deploy.yml`](.github/workflows/deploy.yml) が build 後、Cloudflare Pages（`ramen-timer-support` プロジェクト）へ direct upload
-- 依存関係の更新提案: [`renovate.json5`](.github/renovate.json5)（npm / GitHub Actions、週次。minor / patch はグループ化、major は個別 PR）。
-  ただし Renovate は現在 silent mode で動いており PR も Dependency Dashboard も出ない
+- 依存関係の更新提案: [`renovate.json5`](.github/renovate.json5)（npm / GitHub Actions、週次。minor / patch はグループ化、major は個別 PR）。PR も [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) も通常どおり出る（適用は意図的に行う）
 - 脆弱性由来の更新: Dependabot security updates（リポジトリ設定側の機能で `.github/dependabot.yml` は不要）
 - デプロイ先: <https://ramentimer.keroway.com>
 
