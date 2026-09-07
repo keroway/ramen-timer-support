@@ -54,7 +54,7 @@ docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初�
 
 ## CI / デプロイ
 
-- PR: `ci.yml`（Biome + Prettier のフォーマットチェック + `astro check` + build + `pnpm run a11y`（`html-validate` によるアクセシビリティ回帰チェック））と `gitleaks.yml`（secret scan、org 共通の reusable workflow）
+- PR: `ci.yml`（Biome + Prettier のフォーマットチェック + `astro check` + build + `pnpm run a11y`（`html-validate` によるアクセシビリティ回帰チェック））と `gitleaks.yml`（secret scan、org 共通の reusable workflow）、`osv-scan.yml`（依存脆弱性スキャン、パスフィルタなしで全 PR で無条件に実行）。`workflow-lint.yml` は `.github/workflows/**` / `**/*.sh` 変更時のみ実行
 - `main` push: `deploy.yml` が build 後 `dist/` を Cloudflare Pages（`ramen-timer-support` プロジェクト）へ direct upload
 - 必要な GitHub Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
 - 初回セットアップ・カスタムドメイン設定は [`docs/cloudflare-pages-setup.md`](docs/cloudflare-pages-setup.md) を参照
