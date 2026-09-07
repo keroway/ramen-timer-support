@@ -8,6 +8,10 @@
   timezone: "Asia/Tokyo",
   labels: ["dependencies"],
   prConcurrentLimit: 5,
+  // pnpm-workspace.yaml の minimumReleaseAge (4320分=3日) と揃え、公開直後のバージョンでは
+  // PR自体を作らない。揃っていないと、PRは即作られるがCIのfrozen-lockfile installだけ
+  // 数日間失敗し続ける（keroway/reflectorbit-lp #204 で実際に発生）。
+  minimumReleaseAge: "3 days",
   packageRules: [
     {
       description: "npm: マイナー / パッチはまとめて 1 PR にしてノイズを抑える（major は個別 PR）",
