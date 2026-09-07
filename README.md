@@ -62,7 +62,7 @@ docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初�
 
 ## CI / デプロイ
 
-- Pull request: [`ci.yml`](.github/workflows/ci.yml)（Biome + Prettier のフォーマットチェック、`astro check`、build、`pnpm run a11y`（`html-validate` によるアクセシビリティ回帰チェック））、[`gitleaks.yml`](.github/workflows/gitleaks.yml)（secret scan、org 共通の reusable workflow）
+- Pull request: [`ci.yml`](.github/workflows/ci.yml)（Biome + Prettier のフォーマットチェック、`astro check`、build、`pnpm run a11y`（`html-validate` によるアクセシビリティ回帰チェック））、[`gitleaks.yml`](.github/workflows/gitleaks.yml)（secret scan、org 共通の reusable workflow）、[`osv-scan.yml`](.github/workflows/osv-scan.yml)（依存脆弱性スキャン、パスフィルタなしで全 PR で無条件に実行）。[`workflow-lint.yml`](.github/workflows/workflow-lint.yml) は `.github/workflows/**` / `**/*.sh` を変更する PR でのみ実行
 - `main` への push: [`deploy.yml`](.github/workflows/deploy.yml) が build 後、Cloudflare Pages（`ramen-timer-support` プロジェクト）へ direct upload
 - 依存関係の更新提案: [`renovate.json5`](.github/renovate.json5)（npm / GitHub Actions、週次。minor / patch はグループ化、major は個別 PR）。PR も [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) も通常どおり出る（適用は意図的に行う）
 - 脆弱性由来の更新: Dependabot security updates（リポジトリ設定側の機能で `.github/dependabot.yml` は不要）
