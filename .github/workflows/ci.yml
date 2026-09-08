@@ -45,5 +45,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
+      - run: pnpm run check:contrast
       - run: pnpm run build
       - run: pnpm run a11y
