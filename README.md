@@ -32,6 +32,7 @@ pnpm run dev
 | `pnpm run build` | プロダクションビルド（`astro build`、出力先は `dist/`） |
 | `pnpm run preview` | ビルド済み `dist/` をプレビュー |
 | `pnpm run check` | `astro check`（TypeScript・`.astro` の型/整合性チェック） |
+| `pnpm run check:contrast` | `global.css` の CTA ボタン配色が WCAG AA (4.5:1) を満たすか静的に検証 |
 | `pnpm run lint` | `biome ci`（`*.ts` / `*.js` / `*.mjs` / `*.json` の Lint + フォーマット崩れ検出） |
 | `pnpm run format` | Biome + Prettier で全対象ファイルを整形 |
 | `pnpm run format:check` | `format` の内容を変更せずに検証（CI で使用） |
@@ -41,7 +42,7 @@ pnpm run dev
 PR 前に次のコマンドを通すこと（CI と同じ）:
 
 ```bash
-pnpm run format:check && pnpm run check && pnpm run build && pnpm run a11y
+pnpm run format:check && pnpm run check && pnpm run check:contrast && pnpm run build && pnpm run a11y
 ```
 
 ## ディレクトリ構成

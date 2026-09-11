@@ -85,6 +85,7 @@ fi
 run_biome=false
 run_astro=false
 run_prettier=false
+run_contrast=false
 while IFS= read -r f; do
   [ -z "$f" ] && continue
   case "$f" in
@@ -95,6 +96,9 @@ while IFS= read -r f; do
   esac
   case "$f" in
   *.astro | *.css) run_prettier=true ;;
+  esac
+  case "$f" in
+  *.css) run_contrast=true ;;
   esac
 done <<CHANGED
 $changed_files
@@ -112,7 +116,10 @@ run_with_timeout() {
 }
 
 fail=0
-log_dir="$(mktemp -d 2>/dev/null || echo /tmp)"
+log_dir="$(mktemp -d)" || {
+  echo "post-stop-check: mktemp -d に失敗しました（silent-pass 禁止のため失敗として扱います）" >&2
+  exit 2
+}
 
 if [ "$run_biome" = "true" ]; then
   if ! run_with_timeout 30 pnpm run lint >"${log_dir}/lint.log" 2>&1; then
@@ -138,7 +145,15 @@ if [ "$run_prettier" = "true" ]; then
   fi
 fi
 
-rm -rf "$log_dir" 2>/dev/null || true
+if [ "$run_contrast" = "true" ]; then
+  if ! run_with_timeout 30 pnpm run check:contrast >"${log_dir}/check-contrast.log" 2>&1; then
+    echo "post-stop-check: pnpm run check:contrast が失敗しました" >&2
+    cat "${log_dir}/check-contrast.log" >&2
+    fail=1
+  fi
+fi
+
+rm -rf "$log_dir"
 
 if [ "$fail" -ne 0 ]; then
   exit 2
