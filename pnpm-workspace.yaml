@@ -21,13 +21,24 @@ overrides:
   # host confusion (ポリシー判定と実際の遷移先の不一致) を招く。
   # ajv > yaml-language-server > @astrojs/language-server > @astrojs/check 経由 (型チェック時のみ)。
   "fast-uri@<3.1.6": ">=3.1.6 <4"
-  # GHSA-5p4m-2wfm-xmqj (js-yaml <4.3.1) — !!omap 解決の二次計算量 DoS。
+  # GHSA-5p4m-2wfm-xmqj (js-yaml <4.3.1) の !!omap 解決の二次計算量 DoS に加え、
+  # GHSA-2883-xcg3-v3hh (js-yaml <=4.3.1) — maxTotalMergeKeys が空マッピングを
+  # カウントしないため、空マッピングの大量マージで同種の DoS を再現できる (#96)。
   # @astrojs/internal-helpers > astro 経由 (SSG のビルド時に自リポジトリのコンテンツを読むだけ)。
-  "js-yaml@>=4.0.0 <4.3.1": ">=4.3.1 <5"
+  "js-yaml@>=4.0.0 <4.3.2": ">=4.3.2 <5"
   # GHSA-2v37-7h3g-55p8 (nanoid <3.3.17) — size=0 で customAlphabet / customRandom が
   # 無限ループする。postcss (ソースマップ用 ID 生成、size は固定) > vite > astro 経由。
   # advisory の影響範囲が 2026-08-08 に 3.3.16 まで拡大されたため追加。
   "nanoid@>=3.0.0 <3.3.17": ">=3.3.17 <4"
+  # GHSA-rgj7-g3m4-5g8c (sharp <0.35.4) — 依存する libheif の脆弱性 (glibc 環境での
+  # AVIF デコード時に RCE の可能性) に起因。astro 経由分は 7.3.1 化で追随済みだが、
+  # wrangler > miniflare 経由 (ローカル実行ランタイムのみ、デプロイ成果物には含まれない)
+  # がまだ古いバージョンを引いているため 0.x の破壊的変更を避けて明示的に固定する (#96)。
+  "sharp@>=0.35.0 <0.35.4": ">=0.35.4 <0.36"
+  # GHSA-4vpr-x523-8j87 / GHSA-w27v-7q3p-w38r (svgo <4.1.0) — removeScripts プラグインの
+  # <foreignObject> / 名前空間付き要素 / 制御文字を使った回避で script 除去が不完全になり
+  # XSS を招く。astro (ビルド時の SVG 最適化用) 経由 (#96)。
+  "svgo@>=4.0.0 <4.1.0": ">=4.1.0 <5"
   # GHSA-4cwx-7wf7-3272 ほか計 4 件 (undici <7.29.0)。
   # wrangler のローカル実行ランタイム miniflare 経由 (デプロイ成果物には含まれない)。
   "undici@<7.29.0": ">=7.29.0 <8"
