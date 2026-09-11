@@ -22,6 +22,7 @@ check:
     pnpm run format:check
     pnpm run lint
     pnpm run check
+    pnpm run check:contrast
 
 # dist/ をビルドしてから a11y（html-validate）チェックを実行
 a11y:
