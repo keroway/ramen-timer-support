@@ -28,9 +28,15 @@ function contrastWithWhite(hex) {
   return 1.05 / (relativeLuminance(hex) + 0.05);
 }
 
+function stripComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
 function parseDeclarations(block) {
   const decls = new Map();
-  for (const match of block.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) {
+  for (const match of stripComments(block).matchAll(
+    /(--[\w-]+)\s*:\s*([^;]+);/g
+  )) {
     decls.set(match[1], match[2].trim());
   }
   return decls;
@@ -51,7 +57,7 @@ function resolve(decls, value) {
   return current.slice(1);
 }
 
-const css = readFileSync(CSS_PATH, "utf8");
+const css = stripComments(readFileSync(CSS_PATH, "utf8"));
 const darkMatch = css.match(
   /@media \(prefers-color-scheme: dark\)\s*{\s*:root\s*{([^}]+)}/
 );
