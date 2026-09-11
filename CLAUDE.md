@@ -23,7 +23,7 @@ pnpm run a11y         # html-validate "dist/**/*.html"（アクセシビリテ�
 pnpm run generate:og-image # assets/og-image.svg から public/og-image.png (1200x630) を生成
 ```
 
-PR 前に `pnpm run format:check && pnpm run check && pnpm run check:contrast && pnpm run build && pnpm run a11y` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。
+PR 前に `pnpm run format:check && pnpm run check && pnpm run check:contrast && pnpm run check:contrast:test && pnpm run build && pnpm run a11y` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。
 
 ## ディレクトリ構成
 
