@@ -21,6 +21,7 @@ pre-commit:
 
 pre-push:
   jobs:
-    # ユニットテストはないため、format:check（biome ci + prettier --check）+ astro check の全通しで代替
+    # ユニットテストはないため、format:check（biome ci + prettier --check）+ astro check + check:contrast の全通しで代替
+    # build / a11y はコスト面から意図的に除外（'just a11y' 参照）
     - name: check
-      run: pnpm run format:check && pnpm run check
+      run: pnpm run format:check && pnpm run check && pnpm run check:contrast
