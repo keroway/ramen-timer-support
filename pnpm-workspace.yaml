@@ -42,3 +42,7 @@ overrides:
   # GHSA-4cwx-7wf7-3272 ほか計 4 件 (undici <7.29.0)。
   # wrangler のローカル実行ランタイム miniflare 経由 (デプロイ成果物には含まれない)。
   "undici@<7.29.0": ">=7.29.0 <8"
+  # GHSA-9rgm-9g3h-6x36 (devalue <5.9.2) — devalue.parse() が不正な
+  # out-of-bounds インデックスを拒否せず、細工した入力でペイロードサイズに対し
+  # 二次的な計算量となり DoS を招く。astro (SSR/クライアント間のシリアライズ) 経由。
+  "devalue@<5.9.2": ">=5.9.2 <6"
