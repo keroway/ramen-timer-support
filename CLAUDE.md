@@ -23,7 +23,7 @@ pnpm run a11y         # html-validate "dist/**/*.html"（アクセシビリテ�
 pnpm run generate:og-image # assets/og-image.svg から public/og-image.png (1200x630) を生成
 ```
 
-PR 前に `pnpm run format:check && pnpm run check && pnpm run check:contrast && pnpm run check:contrast:test && pnpm run build && pnpm run a11y` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。
+PR 前に `pnpm run format:check && pnpm run check && pnpm run check:contrast && pnpm run check:contrast:test && pnpm run build && pnpm run a11y` を通すこと（CI と同じ）。Node バージョンは [`.nvmrc`](.nvmrc) が唯一のソース（CI もここから読む）。pnpm バージョンは `package.json` の `packageManager` が唯一のソースで、workflow の `pnpm/action-setup` に `with.version` を書かない（両方あると値の食い違いで action が落ち、Renovate の片側だけの更新 PR が必ず fail する。#108）。
 
 ## ディレクトリ構成
 
