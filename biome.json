@@ -11,7 +11,10 @@
       "!.astro",
       "!.wrangler",
       "!package-lock.json",
-      "!.claude"
+      "!.claude",
+      "!.agents",
+      "!.codex",
+      "!.pi"
     ]
   },
   "formatter": {
