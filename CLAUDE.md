@@ -62,3 +62,9 @@ docs/cloudflare-pages-setup.md # デプロイ・カスタムドメインの初�
 ## コミット規約
 
 Conventional Commits（subject は日本語）。`main` への直 push はせず PR 経由。
+
+## Codex 向け運用ルール
+
+Codex 向けの横断運用ルールは `keroway/CLAUDE.md` ではなく
+[agent-assets `docs/codex-common-instructions.md`](https://github.com/keroway/agent-assets/blob/main/docs/codex-common-instructions.md)
+を正典とする（Codex は git ルートより上の AGENTS.md を読まないため）。
