@@ -1,0 +1,6 @@
+rules:
+  cache-poisoning:
+    ignore:
+      # deploy.yml は push:branches:[main] でのみ起動し、PR 経由の未信頼コードは実行しないため誤検知。
+      # 行末の `# zizmor: ignore[...]` にすると Renovate が `# vX.Y.Z` を読めず action を更新しない（#112）。
+      - deploy.yml
