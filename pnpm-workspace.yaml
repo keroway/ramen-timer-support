@@ -1,6 +1,3 @@
-# サプライチェーン保護水準をワークスペース全体で統一 (agent-assets#171、2026-08-14決定)。
-# pnpm 11 既定の minimumReleaseAge (1440分=1日) を 3日 (4320分) に固定し、
-# 制約を満たすバージョンが無いときに resolve を失敗させる minimumReleaseAgeStrict も有効化する。
 minimumReleaseAge: 4320
 minimumReleaseAgeStrict: true
 
@@ -45,4 +42,4 @@ overrides:
   # GHSA-9rgm-9g3h-6x36 (devalue <5.9.2) — devalue.parse() が不正な
   # out-of-bounds インデックスを拒否せず、細工した入力でペイロードサイズに対し
   # 二次的な計算量となり DoS を招く。astro (SSR/クライアント間のシリアライズ) 経由。
-  "devalue@<5.9.2": ">=5.9.2 <6"
+  "devalue@<5.9.2": ">=5.9.2 <7"
