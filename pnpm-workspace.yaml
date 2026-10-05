@@ -17,7 +17,7 @@ overrides:
   # resolve() が scheme-relative な参照のホストを IDN 正規化せず返すため、
   # host confusion (ポリシー判定と実際の遷移先の不一致) を招く。
   # ajv > yaml-language-server > @astrojs/language-server > @astrojs/check 経由 (型チェック時のみ)。
-  "fast-uri@<3.1.6": ">=3.1.6 <4"
+  "fast-uri@<3.1.6": ">=3.1.6 <5"
   # GHSA-5p4m-2wfm-xmqj (js-yaml <4.3.1) の !!omap 解決の二次計算量 DoS に加え、
   # GHSA-2883-xcg3-v3hh (js-yaml <=4.3.1) — maxTotalMergeKeys が空マッピングを
   # カウントしないため、空マッピングの大量マージで同種の DoS を再現できる (#96)。
