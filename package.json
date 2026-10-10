@@ -6,7 +6,7 @@
   "engines": {
     "node": ">=26"
   },
-  "packageManager": "pnpm@11.27.1",
+  "packageManager": "pnpm@11.28.5",
   "scripts": {
     "postinstall": "lefthook install",
     "dev": "astro dev",
@@ -23,16 +23,16 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
-    "astro": "7.3.3"
+    "astro": "7.3.6"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
-    "@biomejs/biome": "2.5.14",
-    "html-validate": "11.16.0",
-    "lefthook": "2.1.14",
-    "prettier": "3.9.8",
+    "@biomejs/biome": "2.5.15",
+    "html-validate": "11.16.2",
+    "lefthook": "2.1.17",
+    "prettier": "3.9.9",
     "prettier-plugin-astro": "0.14.1",
     "typescript": "5.9.3",
-    "wrangler": "4.136.1"
+    "wrangler": "4.148.0"
   }
 }
