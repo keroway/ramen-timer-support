@@ -42,6 +42,13 @@ assert.ok(
   "global.css のライト側 --color-cta-bg 宣言またはダーク @media が想定と異なります"
 );
 
+const DARK_HOVER_DECL = "    --color-cta-bg-hover: #b8511f;\n";
+
+assert.ok(
+  CSS_SOURCE.includes(DARK_HOVER_DECL),
+  "global.css のダーク側 --color-cta-bg-hover 宣言が想定と異なります"
+);
+
 const CASES = [
   { name: "baseline", css: CSS_SOURCE, expectedExitCode: 0 },
   {
@@ -136,6 +143,43 @@ const CASES = [
       ".cta-primary {\n  display: inline-block;\n  background: var(--color-cta-bg);\n  color: #FFFFFF;"
     ),
     expectedExitCode: 0,
+  },
+  {
+    name: "trailing_light_root_white",
+    css: `${CSS_SOURCE}\n:root {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "trailing_light_root_safe",
+    css: `${CSS_SOURCE}\n:root {\n  --color-cta-bg: #7a3416;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
+    name: "trailing_dark_media_root_white",
+    css:
+      `${CSS_SOURCE}\n${DARK_MEDIA}\n  :root {\n` +
+      "    --color-cta-bg: #ffffff;\n    --color-cta-bg-hover: #ffffff;\n  }\n}\n",
+    expectedExitCode: 1,
+  },
+  {
+    name: "trailing_dark_media_root_safe",
+    css:
+      `${CSS_SOURCE}\n${DARK_MEDIA}\n  :root {\n` +
+      "    --color-cta-bg: #7a3416;\n  }\n}\n",
+    expectedExitCode: 0,
+  },
+  {
+    name: "dark_omitted_token_resolves_from_common_root",
+    css: CSS_SOURCE.replace(DARK_HOVER_DECL, ""),
+    expectedExitCode: 0,
+  },
+  {
+    name: "dark_omitted_token_inherits_unsafe_common_value",
+    css: CSS_SOURCE.replace(DARK_HOVER_DECL, "").replace(
+      OLD_HOVER_DECL,
+      "  --color-cta-bg-hover: #ffffff;"
+    ),
+    expectedExitCode: 1,
   },
 ];
 

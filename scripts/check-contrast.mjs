@@ -68,26 +68,71 @@ function resolve(decls, value) {
   return current.slice(1);
 }
 
-const css = stripComments(readFileSync(CSS_PATH, "utf8"));
-const darkMatch = css.match(
-  /@media \(prefers-color-scheme: dark\)\s*{\s*:root\s*{([^}]+)}/
-);
-if (!darkMatch) {
-  throw new Error("ダークモードの :root ブロックが見つかりません");
+// 波括弧のネストを考慮して { prelude, body } の列を出現順に返す。
+function parseBlocks(source) {
+  const blocks = [];
+  let depth = 0;
+  let start = 0;
+  let bodyStart = 0;
+  let prelude = "";
+  for (let i = 0; i < source.length; i += 1) {
+    const ch = source[i];
+    if (ch === "{") {
+      if (depth === 0) {
+        prelude = source.slice(start, i).trim();
+        bodyStart = i + 1;
+      }
+      depth += 1;
+    } else if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        blocks.push({ prelude, body: source.slice(bodyStart, i) });
+        start = i + 1;
+      }
+    }
+  }
+  return blocks;
 }
 
-// ライトモードは最初の @media より前にある `:root` ブロックの宣言だけを
-// 対象にする。他セレクタの同名プロパティを混入させない (#123)。
-const rootBlocks = [
-  ...css.split("@media")[0].matchAll(/(?:^|})\s*:root\s*{([^}]*)}/g),
-].map((match) => match[1]);
-if (rootBlocks.length === 0) {
-  throw new Error("ライトモードの :root ブロックが見つかりません");
+const DARK_MEDIA = /^@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)$/;
+
+// :root の宣言を CSS 全体から出現順に解決する (#127, #129)。
+// ライトは無条件の :root のみ、ダークはそれに加えてダーク条件内の :root を
+// 同じソース順で重ねる（後勝ち）。他セレクタの同名プロパティは混入させない (#123)。
+function collectModes(source) {
+  const light = new Map();
+  const dark = new Map();
+  let hasLightRoot = false;
+  let hasDarkRoot = false;
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (prelude === ":root") {
+      hasLightRoot = true;
+      for (const [k, v] of parseDeclarations(body)) {
+        light.set(k, v);
+        dark.set(k, v);
+      }
+    } else if (DARK_MEDIA.test(prelude)) {
+      for (const inner of parseBlocks(body)) {
+        if (inner.prelude !== ":root") continue;
+        hasDarkRoot = true;
+        for (const [k, v] of parseDeclarations(inner.body)) dark.set(k, v);
+      }
+    }
+  }
+  if (!hasLightRoot) {
+    throw new Error("ライトモードの :root ブロックが見つかりません");
+  }
+  if (!hasDarkRoot) {
+    throw new Error("ダークモードの :root ブロックが見つかりません");
+  }
+  return [
+    { name: "light", decls: light },
+    { name: "dark", decls: dark },
+  ];
 }
-const modes = [
-  { name: "light", decls: parseDeclarations(rootBlocks.join("\n")) },
-  { name: "dark", decls: parseDeclarations(darkMatch[1]) },
-];
+
+const css = stripComments(readFileSync(CSS_PATH, "utf8"));
+const modes = collectModes(css);
 
 let hasFailure = false;
 for (const { name, decls } of modes) {
