@@ -50,3 +50,7 @@ overrides:
   # GHSA-r4xh-jqrq-34v2 (smol-toml <1.9.0, CVSS 5.3)。
   # astro 経由 (ビルド時の TOML 解析のみ、デプロイ成果物には含まれない)。
   "smol-toml@<1.9.0": ">=1.9.0 <2"
+  # GHSA-ch52-4w7c-c8xp (http-cache-semantics <=4.2.0, CVSS 8.7) — max-stale の扱いにより
+  # 共有キャッシュでユーザ間のレスポンスが漏れる。astro の直接依存 (^4.2.0、ビルド時のみ) 経由。
+  # 4.3.0 (2026-10-04) で範囲外になったため引き上げる (#118)。
+  "http-cache-semantics@<4.3.0": ">=4.3.0 <5"
