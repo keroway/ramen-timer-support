@@ -86,6 +86,8 @@ run_biome=false
 run_astro=false
 run_prettier=false
 run_contrast=false
+run_contrast_test=false
+run_csp_test=false
 while IFS= read -r f; do
   [ -z "$f" ] && continue
   case "$f" in
@@ -99,6 +101,11 @@ while IFS= read -r f; do
   esac
   case "$f" in
   *.css) run_contrast=true ;;
+  esac
+  # 検査スクリプト自身の変更も検知する（*.css を触らないと silent pass になる構造の防止, #101）
+  case "$f" in
+  scripts/check-contrast*.mjs) run_contrast=true run_contrast_test=true ;;
+  scripts/check-csp-scripts*.mjs) run_csp_test=true ;;
   esac
 done <<CHANGED
 $changed_files
@@ -149,6 +156,22 @@ if [ "$run_contrast" = "true" ]; then
   if ! run_with_timeout 30 pnpm run check:contrast >"${log_dir}/check-contrast.log" 2>&1; then
     echo "post-stop-check: pnpm run check:contrast が失敗しました" >&2
     cat "${log_dir}/check-contrast.log" >&2
+    fail=1
+  fi
+fi
+
+if [ "$run_contrast_test" = "true" ]; then
+  if ! run_with_timeout 30 pnpm run check:contrast:test >"${log_dir}/check-contrast-test.log" 2>&1; then
+    echo "post-stop-check: pnpm run check:contrast:test が失敗しました" >&2
+    cat "${log_dir}/check-contrast-test.log" >&2
+    fail=1
+  fi
+fi
+
+if [ "$run_csp_test" = "true" ]; then
+  if ! run_with_timeout 30 pnpm run check:csp:test >"${log_dir}/check-csp-test.log" 2>&1; then
+    echo "post-stop-check: pnpm run check:csp:test が失敗しました" >&2
+    cat "${log_dir}/check-csp-test.log" >&2
     fail=1
   fi
 fi

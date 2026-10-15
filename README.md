@@ -33,16 +33,18 @@ pnpm run dev
 | `pnpm run preview` | ビルド済み `dist/` をプレビュー |
 | `pnpm run check` | `astro check`（TypeScript・`.astro` の型/整合性チェック） |
 | `pnpm run check:contrast` | `global.css` の CTA ボタン配色が WCAG AA (4.5:1) を満たすか静的に検証 |
+| `pnpm run check:contrast:test` | `check-contrast.mjs` 自体の回帰テスト（CSS 解析・文字色前提の見逃し防止） |
+| `pnpm run check:csp:test` | `check-csp-scripts.mjs`（CSP `script-src 'self'` に反する script の検知）の回帰テスト |
 | `pnpm run lint` | `biome ci`（`*.ts` / `*.js` / `*.mjs` / `*.json` の Lint + フォーマット崩れ検出） |
 | `pnpm run format` | Biome + Prettier で全対象ファイルを整形 |
 | `pnpm run format:check` | `format` の内容を変更せずに検証（CI で使用） |
-| `pnpm run a11y` | `html-validate` で `dist/**/*.html` のアクセシビリティ回帰を検知（`build` 後の `dist/` が対象） |
+| `pnpm run a11y` | `html-validate` で `dist/**/*.html` のアクセシビリティ回帰を検知し、CSP に反する script も拒否（`build` 後の `dist/` が対象） |
 | `pnpm run generate:og-image` | `assets/og-image.svg` から `public/og-image.png`（1200x630）を生成 |
 
 PR 前に次のコマンドを通すこと（CI と同じ）:
 
 ```bash
-pnpm run format:check && pnpm run check && pnpm run check:contrast && pnpm run build && pnpm run a11y
+pnpm run format:check && pnpm run check && pnpm run check:contrast && pnpm run check:contrast:test && pnpm run check:csp:test && pnpm run build && pnpm run a11y
 ```
 
 ## ディレクトリ構成

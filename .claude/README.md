@@ -25,7 +25,10 @@ Claude Code のターン終了時（Stop）に、安い順の決定的チェッ�
    `git status --porcelain -z`（NUL区切り）で取得し、空白を含むパスも壊さず判定する。
 3. **影響領域のみ実行**: 変更ファイルの拡張子に応じて `pnpm run lint`（`*.ts/*.js/*.mjs/*.json`
    が対象）、`pnpm run check`（`*.astro/*.ts` が対象）、`prettier --check "**/*.{astro,css}"`
-   （`*.astro/*.css` が対象）を選択的に実行する。
+   （`*.astro/*.css` が対象）、`pnpm run check:contrast`（`*.css` が対象。
+   `scripts/check-contrast*.mjs` の変更でも実行する）を選択的に実行する。検査スクリプト自身の
+   回帰テストとして、`scripts/check-contrast*.mjs` の変更時は `pnpm run check:contrast:test`、
+   `scripts/check-csp-scripts*.mjs` の変更時は `pnpm run check:csp:test` も実行する。
 4. **silent-pass 禁止**: リポジトリルートへの `cd` 失敗や `git` / `pnpm` コマンド不在は
    検証をスキップせず exit 2（ブロッキングエラー）として扱う。
 
@@ -39,7 +42,8 @@ Claude Code のターン終了時（Stop）に、安い順の決定的チェッ�
 
 `settings.json` 側のタイムアウトは 120 秒。ワークスペース標準の目安は軽量リポジトリで
 30 秒だが、本リポジトリは Astro（SSG）のため `astro check` の起動コストを見込んで
-120 秒に緩めている。スクリプト内部でも `pnpm run lint` は 30 秒、`pnpm run check` は
+120 秒に緩めている。スクリプト内部でも `pnpm run lint` / `check:contrast` /
+`check:contrast:test` / `check:csp:test` は 30 秒、`pnpm run check` は
 90 秒を上限に `timeout` コマンドで区切っている（`timeout` が無い環境では上限なしで実行）。
 
 ## 一時的に無効化したい場合
