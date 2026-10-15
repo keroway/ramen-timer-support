@@ -103,6 +103,40 @@ const CASES = [
     ),
     expectedExitCode: 0,
   },
+  {
+    name: "cta_primary_black_text",
+    css: CSS_SOURCE.replace(
+      ".cta-primary {\n  display: inline-block;\n  background: var(--color-cta-bg);\n  color: #fff;",
+      ".cta-primary {\n  display: inline-block;\n  background: var(--color-cta-bg);\n  color: #000;"
+    ),
+    expectedExitCode: 1,
+    expectedStderr: "白文字前提",
+  },
+  {
+    name: "skip_link_black_text",
+    css: CSS_SOURCE.replace(
+      "  background: var(--color-cta-bg);\n  color: #fff;\n  padding: var(--space-two) var(--space-three);",
+      "  background: var(--color-cta-bg);\n  color: #000;\n  padding: var(--space-two) var(--space-three);"
+    ),
+    expectedExitCode: 1,
+    expectedStderr: "白文字前提",
+  },
+  {
+    name: "cta_primary_text_color_removed",
+    css: CSS_SOURCE.replace(
+      "  background: var(--color-cta-bg);\n  color: #fff;\n  text-decoration: none;",
+      "  background: var(--color-cta-bg);\n  text-decoration: none;"
+    ),
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_long_white_hex",
+    css: CSS_SOURCE.replace(
+      ".cta-primary {\n  display: inline-block;\n  background: var(--color-cta-bg);\n  color: #fff;",
+      ".cta-primary {\n  display: inline-block;\n  background: var(--color-cta-bg);\n  color: #FFFFFF;"
+    ),
+    expectedExitCode: 0,
+  },
 ];
 
 function runCheckContrast(cssContent) {

@@ -13,6 +13,10 @@ const CSS_PATH = fileURLToPath(
 );
 const MIN_CONTRAST = 4.5;
 const TOKENS = ["--color-cta-bg", "--color-cta-bg-hover"];
+// 背景トークンを白文字前提で検査しているため、これらのセレクタの文字色も
+// 白であることを前提条件として検証する (#128)。
+const WHITE_TEXT_SELECTORS = [".cta-primary", ".skip-link"];
+const WHITE_VALUES = new Set(["#fff", "#ffffff", "white"]);
 
 function relativeLuminance(hex) {
   const channels = [0, 2, 4].map(
@@ -101,9 +105,24 @@ for (const { name, decls } of modes) {
   }
 }
 
+for (const selector of WHITE_TEXT_SELECTORS) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const block = css.match(new RegExp(`(?:^|})\\s*${escaped}\\s*{([^}]*)}`));
+  if (!block) {
+    throw new Error(`${selector} のルールが見つかりません`);
+  }
+  const color = block[1].match(/(?:^|[;\s])color\s*:\s*([^;]+?)\s*(?:;|$)/);
+  const value = color?.[1].toLowerCase();
+  const ok = value !== undefined && WHITE_VALUES.has(value);
+  if (!ok) hasFailure = true;
+  console.log(
+    `${ok ? "OK " : "NG "} ${selector} color ${value ?? "(未指定)"} (白文字前提)`
+  );
+}
+
 if (hasFailure) {
   console.error(
-    `\n白文字との対比が ${MIN_CONTRAST}:1 未満のトークンがあります。`
+    `\n白文字との対比が ${MIN_CONTRAST}:1 未満のトークン、または白文字前提に反する文字色があります。`
   );
   process.exit(1);
 }
