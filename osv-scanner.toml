@@ -1,0 +1,12 @@
+# osv-scanner (CI の osv-scan) が自動で読む設定。期限付きで許容する脆弱性だけを書く。
+# 期限を過ぎると再び検出されるため、修正版の公開状況を再確認すること。
+
+[[IgnoredVulns]]
+id = "GHSA-ch52-4w7c-c8xp"
+ignoreUntil = 2026-11-15
+# http-cache-semantics <=4.2.0 — max-stale の扱いにより共有キャッシュでユーザ間の
+# レスポンスが漏れる (CVSS 8.7)。修正版は未公開 (upstream: kornelski/http-cache-semantics#56)。
+# astro 7.3.x の直接依存。このサイトは静的ビルドのみで、HTTP キャッシュ層として
+# 実行時に使わない (ビルド時のみ) ため影響を受けない。
+# upstream が修正版を出し astro が取り込んだら、この定義を削除する (#118)。
+reason = "修正版なし。astro 経由のビルド時依存で、静的サイトの実行時には含まれない"
