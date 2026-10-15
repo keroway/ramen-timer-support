@@ -43,5 +43,6 @@ jobs:
       - run: pnpm run check
       - run: pnpm run check:contrast
       - run: pnpm run check:contrast:test
+      - run: pnpm run check:csp:test
       - run: pnpm run build
       - run: pnpm run a11y

@@ -8,6 +8,7 @@ build:
 
 test:
     pnpm run check:contrast:test
+    pnpm run check:csp:test
 
 lint:
     pnpm run lint
@@ -23,6 +24,7 @@ check:
     pnpm run check
     pnpm run check:contrast
     pnpm run check:contrast:test
+    pnpm run check:csp:test
 
 # dist/ をビルドしてから a11y（html-validate）チェックを実行
 a11y:
