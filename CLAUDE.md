@@ -4,8 +4,8 @@
 
 「まてた！ラーメンタイマー」の公式サポート・プライバシーポリシーサイト（`ramentimer.keroway.com`）。App Store / Google Play のサポート URL 要件を満たすための静的サイトで、アプリ本体のコードはこのリポジトリには含まない。
 
-- アプリ本体: [`ramen-timer`](https://github.com/keroway-family/ramen-timer)（PWA, React）
-- モバイル版: [`ramen-timer-mobile`](https://github.com/keroway-family/ramen-timer-mobile)（Expo）
+- アプリ本体: [`ramen-timer`](https://github.com/keroway/ramen-timer)（PWA, React）
+- モバイル版: [`ramen-timer-mobile`](https://github.com/keroway/ramen-timer-mobile)（Expo）
 - このリポジトリはサポート窓口・プライバシーポリシーの掲載のみを担当する
 
 ## コマンド

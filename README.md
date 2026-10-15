@@ -5,7 +5,7 @@
 - Support: <https://ramentimer.keroway.com>
 - Privacy policy: <https://ramentimer.keroway.com/privacy>
 - Contact: `app@keroway.com`
-- アプリ本体: [`ramen-timer`](https://github.com/keroway-family/ramen-timer)（PWA, React） / [`ramen-timer-mobile`](https://github.com/keroway-family/ramen-timer-mobile)（Expo）
+- アプリ本体: [`ramen-timer`](https://github.com/keroway/ramen-timer)（PWA, React） / [`ramen-timer-mobile`](https://github.com/keroway/ramen-timer-mobile)（Expo）
 
 ## 技術スタック
 
