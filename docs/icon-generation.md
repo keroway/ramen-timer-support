@@ -27,7 +27,7 @@ npx --yes sharp-cli@5.2.0 resize 180 180 \
 生成後は必ず以下を実行する。
 
 ```bash
-pnpm run format:check && pnpm run check && pnpm run build
+pnpm run format:check && pnpm run check && pnpm run check:contrast && pnpm run check:contrast:test && pnpm run check:csp:test && pnpm run build && pnpm run a11y
 ```
 
 生成した PNG が `dist/` にコピーされ、`BaseLayout.astro` の `<link rel="apple-touch-icon">` 経由で参照されていることを確認する。
