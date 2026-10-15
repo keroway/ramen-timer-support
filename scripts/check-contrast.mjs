@@ -44,8 +44,15 @@ function parseDeclarations(block) {
 
 function resolve(decls, value) {
   let current = value;
+  const visited = new Set();
   while (current.startsWith("var(")) {
     const name = current.slice(4, -1).trim();
+    if (visited.has(name)) {
+      throw new Error(
+        `カスタムプロパティが循環参照しています: ${[...visited, name].join(" -> ")}`
+      );
+    }
+    visited.add(name);
     if (!decls.has(name)) {
       throw new Error(`未定義のカスタムプロパティを参照しています: ${name}`);
     }
@@ -65,9 +72,16 @@ if (!darkMatch) {
   throw new Error("ダークモードの :root ブロックが見つかりません");
 }
 
-const rootBlock = css.split("@media")[0];
+// ライトモードは最初の @media より前にある `:root` ブロックの宣言だけを
+// 対象にする。他セレクタの同名プロパティを混入させない (#123)。
+const rootBlocks = [
+  ...css.split("@media")[0].matchAll(/(?:^|})\s*:root\s*{([^}]*)}/g),
+].map((match) => match[1]);
+if (rootBlocks.length === 0) {
+  throw new Error("ライトモードの :root ブロックが見つかりません");
+}
 const modes = [
-  { name: "light", decls: parseDeclarations(rootBlock) },
+  { name: "light", decls: parseDeclarations(rootBlocks.join("\n")) },
   { name: "dark", decls: parseDeclarations(darkMatch[1]) },
 ];
 

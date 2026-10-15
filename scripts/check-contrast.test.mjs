@@ -34,6 +34,14 @@ assert.ok(
   "global.css の --color-cta-bg-hover 宣言が想定と異なります"
 );
 
+const LIGHT_CTA_DECL = "  --color-cta-bg: var(--color-accent);";
+const DARK_MEDIA = "@media (prefers-color-scheme: dark) {";
+
+assert.ok(
+  CSS_SOURCE.includes(LIGHT_CTA_DECL) && CSS_SOURCE.includes(DARK_MEDIA),
+  "global.css のライト側 --color-cta-bg 宣言またはダーク @media が想定と異なります"
+);
+
 const CASES = [
   { name: "baseline", css: CSS_SOURCE, expectedExitCode: 0 },
   {
@@ -58,6 +66,43 @@ const CASES = [
     ),
     expectedExitCode: 0,
   },
+  {
+    name: "self_referencing_var",
+    css: CSS_SOURCE.replace(
+      "--color-cta-bg: var(--color-accent);",
+      "--color-cta-bg: var(--color-cta-bg);"
+    ),
+    expectedExitCode: 1,
+    expectedStderr: "循環参照",
+  },
+  {
+    name: "mutually_referencing_vars",
+    css: CSS_SOURCE.replace(
+      "--color-accent: #8b3d1a;",
+      "--color-accent: var(--color-cta-bg);"
+    ),
+    expectedExitCode: 1,
+    expectedStderr: "循環参照",
+  },
+  {
+    name: "white_root_masked_by_unrelated_selector",
+    css: CSS_SOURCE.replace(
+      LIGHT_CTA_DECL,
+      "  --color-cta-bg: #ffffff;"
+    ).replace(
+      DARK_MEDIA,
+      `.unused {\n  --color-cta-bg: #8b3d1a;\n}\n\n${DARK_MEDIA}`
+    ),
+    expectedExitCode: 1,
+  },
+  {
+    name: "safe_root_with_unrelated_white_selector",
+    css: CSS_SOURCE.replace(
+      DARK_MEDIA,
+      `.unused {\n  --color-cta-bg: #ffffff;\n}\n\n${DARK_MEDIA}`
+    ),
+    expectedExitCode: 0,
+  },
 ];
 
 function runCheckContrast(cssContent) {
@@ -70,14 +115,14 @@ function runCheckContrast(cssContent) {
     return spawnSync(
       process.execPath,
       [join(dir, "scripts/check-contrast.mjs")],
-      { encoding: "utf8" }
+      { encoding: "utf8", timeout: 5000 }
     );
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
 }
 
-for (const { name, css, expectedExitCode } of CASES) {
+for (const { name, css, expectedExitCode, expectedStderr } of CASES) {
   test(`check-contrast.mjs: ${name} -> exit ${expectedExitCode}`, () => {
     const result = runCheckContrast(css);
     assert.equal(
@@ -85,5 +130,8 @@ for (const { name, css, expectedExitCode } of CASES) {
       expectedExitCode,
       result.stdout + result.stderr
     );
+    if (expectedStderr) {
+      assert.ok(result.stderr.includes(expectedStderr), result.stderr);
+    }
   });
 }
