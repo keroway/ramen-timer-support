@@ -33,6 +33,28 @@ test("プロトコル相対 URL の別オリジンを拒否する", () => {
   assert.equal(findViolations(html, SITE).length, 1);
 });
 
+test("文字参照で書かれた別オリジンの src を拒否する (#137)", () => {
+  for (const src of [
+    "&#47;&#47;example.invalid/app.js",
+    "&#x2F;&#x2f;example.invalid/app.js",
+    "&sol;&sol;example.invalid/app.js",
+    "https&colon;//example.invalid/app.js",
+  ]) {
+    const html = page(`<script src="${src}"></script>`);
+    assert.equal(findViolations(html, SITE).length, 1, src);
+  }
+});
+
+test("文字参照で書かれた同一オリジンの src は通る (#137)", () => {
+  const html = page('<script src="&#47;_astro/app.js"></script>');
+  assert.deepEqual(findViolations(html, SITE), []);
+});
+
+test("文字参照で書かれた type のデータブロックは通る (#137)", () => {
+  const html = page('<script type="application&sol;ld+json">{"a":1}</script>');
+  assert.deepEqual(findViolations(html, SITE), []);
+});
+
 test("同一オリジンの外部ファイルは通る", () => {
   const html = page(
     `<script src="/_astro/app.js"></script><script type="module" src="${SITE}/a.js"></script>`

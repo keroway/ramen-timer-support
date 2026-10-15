@@ -27,13 +27,43 @@ export function readSiteOrigin() {
   return new URL(match[1]).origin;
 }
 
+// ブラウザは属性値の文字参照を復号してから URL として解釈する。URL の判定に
+// 影響しうる名前付き参照のみ扱い、未知の名前はそのまま残す (#137)。
+const NAMED_REFS = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  sol: "/",
+  bsol: "\\",
+  colon: ":",
+  period: ".",
+  Tab: "\t",
+  NewLine: "\n",
+};
+
+function decodeCharRefs(value) {
+  return value.replace(
+    /&(?:#[xX]([0-9a-fA-F]+);?|#([0-9]+);?|([A-Za-z]+);)/g,
+    (whole, hex, dec, name) => {
+      if (name !== undefined) return NAMED_REFS[name] ?? whole;
+      const code = hex !== undefined ? Number.parseInt(hex, 16) : Number(dec);
+      return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff)
+        ? String.fromCodePoint(code)
+        : whole;
+    }
+  );
+}
+
 function attr(attrs, name) {
   const re = new RegExp(
     `(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`,
     "i"
   );
   const m = re.exec(attrs);
-  return m ? (m[1] ?? m[2] ?? m[3]) : undefined;
+  const raw = m ? (m[1] ?? m[2] ?? m[3]) : undefined;
+  return raw === undefined ? undefined : decodeCharRefs(raw);
 }
 
 export function findViolations(html, siteOrigin) {
