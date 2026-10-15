@@ -44,8 +44,15 @@ function parseDeclarations(block) {
 
 function resolve(decls, value) {
   let current = value;
+  const visited = new Set();
   while (current.startsWith("var(")) {
     const name = current.slice(4, -1).trim();
+    if (visited.has(name)) {
+      throw new Error(
+        `カスタムプロパティが循環参照しています: ${[...visited, name].join(" -> ")}`
+      );
+    }
+    visited.add(name);
     if (!decls.has(name)) {
       throw new Error(`未定義のカスタムプロパティを参照しています: ${name}`);
     }

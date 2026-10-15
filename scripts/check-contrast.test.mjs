@@ -67,6 +67,24 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "self_referencing_var",
+    css: CSS_SOURCE.replace(
+      "--color-cta-bg: var(--color-accent);",
+      "--color-cta-bg: var(--color-cta-bg);"
+    ),
+    expectedExitCode: 1,
+    expectedStderr: "循環参照",
+  },
+  {
+    name: "mutually_referencing_vars",
+    css: CSS_SOURCE.replace(
+      "--color-accent: #8b3d1a;",
+      "--color-accent: var(--color-cta-bg);"
+    ),
+    expectedExitCode: 1,
+    expectedStderr: "循環参照",
+  },
+  {
     name: "white_root_masked_by_unrelated_selector",
     css: CSS_SOURCE.replace(
       LIGHT_CTA_DECL,
@@ -97,14 +115,14 @@ function runCheckContrast(cssContent) {
     return spawnSync(
       process.execPath,
       [join(dir, "scripts/check-contrast.mjs")],
-      { encoding: "utf8" }
+      { encoding: "utf8", timeout: 5000 }
     );
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
 }
 
-for (const { name, css, expectedExitCode } of CASES) {
+for (const { name, css, expectedExitCode, expectedStderr } of CASES) {
   test(`check-contrast.mjs: ${name} -> exit ${expectedExitCode}`, () => {
     const result = runCheckContrast(css);
     assert.equal(
@@ -112,5 +130,8 @@ for (const { name, css, expectedExitCode } of CASES) {
       expectedExitCode,
       result.stdout + result.stderr
     );
+    if (expectedStderr) {
+      assert.ok(result.stderr.includes(expectedStderr), result.stderr);
+    }
   });
 }
