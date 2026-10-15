@@ -72,9 +72,16 @@ if (!darkMatch) {
   throw new Error("ダークモードの :root ブロックが見つかりません");
 }
 
-const rootBlock = css.split("@media")[0];
+// ライトモードは最初の @media より前にある `:root` ブロックの宣言だけを
+// 対象にする。他セレクタの同名プロパティを混入させない (#123)。
+const rootBlocks = [
+  ...css.split("@media")[0].matchAll(/(?:^|})\s*:root\s*{([^}]*)}/g),
+].map((match) => match[1]);
+if (rootBlocks.length === 0) {
+  throw new Error("ライトモードの :root ブロックが見つかりません");
+}
 const modes = [
-  { name: "light", decls: parseDeclarations(rootBlock) },
+  { name: "light", decls: parseDeclarations(rootBlocks.join("\n")) },
   { name: "dark", decls: parseDeclarations(darkMatch[1]) },
 ];
 

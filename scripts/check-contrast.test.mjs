@@ -34,6 +34,14 @@ assert.ok(
   "global.css の --color-cta-bg-hover 宣言が想定と異なります"
 );
 
+const LIGHT_CTA_DECL = "  --color-cta-bg: var(--color-accent);";
+const DARK_MEDIA = "@media (prefers-color-scheme: dark) {";
+
+assert.ok(
+  CSS_SOURCE.includes(LIGHT_CTA_DECL) && CSS_SOURCE.includes(DARK_MEDIA),
+  "global.css のライト側 --color-cta-bg 宣言またはダーク @media が想定と異なります"
+);
+
 const CASES = [
   { name: "baseline", css: CSS_SOURCE, expectedExitCode: 0 },
   {
@@ -75,6 +83,25 @@ const CASES = [
     ),
     expectedExitCode: 1,
     expectedStderr: "循環参照",
+  },
+  {
+    name: "white_root_masked_by_unrelated_selector",
+    css: CSS_SOURCE.replace(
+      LIGHT_CTA_DECL,
+      "  --color-cta-bg: #ffffff;"
+    ).replace(
+      DARK_MEDIA,
+      `.unused {\n  --color-cta-bg: #8b3d1a;\n}\n\n${DARK_MEDIA}`
+    ),
+    expectedExitCode: 1,
+  },
+  {
+    name: "safe_root_with_unrelated_white_selector",
+    css: CSS_SOURCE.replace(
+      DARK_MEDIA,
+      `.unused {\n  --color-cta-bg: #ffffff;\n}\n\n${DARK_MEDIA}`
+    ),
+    expectedExitCode: 0,
   },
 ];
 
