@@ -169,12 +169,25 @@ function parseProps(body) {
   return props;
 }
 
-// セレクタに一致するルールの宣言を、@media 内も含めてソース順に集める。
-function collectRules(source, selector) {
+const LIGHT_MEDIA = /^@media\s*\(\s*prefers-color-scheme\s*:\s*light\s*\)$/;
+
+// @media の prelude が指定モードに適用されるか。配色条件のみモードで切り分け、
+// それ以外の条件 (幅・印刷など) は両モードに適用されるものとして扱う (#143)。
+function mediaAppliesTo(prelude, mode) {
+  if (DARK_MEDIA.test(prelude)) return mode === "dark";
+  if (LIGHT_MEDIA.test(prelude)) return mode === "light";
+  return true;
+}
+
+// セレクタに一致するルールの宣言を、指定モードに適用される @media 内も含めて
+// ソース順に集める。
+function collectRules(source, selector, mode) {
   const rules = [];
   for (const { prelude, body } of parseBlocks(source)) {
     if (prelude.startsWith("@media")) {
-      rules.push(...collectRules(body, selector));
+      if (mediaAppliesTo(prelude, mode)) {
+        rules.push(...collectRules(body, selector, mode));
+      }
     } else if (prelude.split(",").some((s) => s.trim() === selector)) {
       rules.push(parseProps(body));
     }
@@ -204,25 +217,25 @@ const WHITE_TEXT_TARGETS = [
   { selector: ".skip-link", bg: "--color-cta-bg" },
 ];
 
-for (const { selector, bg, base } of WHITE_TEXT_TARGETS) {
-  const rules = [
-    ...(base ? collectRules(css, base) : []),
-    ...collectRules(css, selector),
-  ];
-  if (collectRules(css, selector).length === 0) {
-    throw new Error(`${selector} のルールが見つかりません`);
+for (const { name: mode } of modes) {
+  for (const { selector, bg, base } of WHITE_TEXT_TARGETS) {
+    const own = collectRules(css, selector, mode);
+    if (own.length === 0) {
+      throw new Error(`${selector} のルールが見つかりません`);
+    }
+    const rules = [...(base ? collectRules(css, base, mode) : []), ...own];
+    const bgValue = lastValue(rules, ["background", "background-color"]);
+    const bgOk = bgValue === `var(${bg})`;
+    const color = lastValue(rules, ["color"]);
+    const colorOk = color !== undefined && WHITE_VALUES.has(color);
+    if (!bgOk || !colorOk) hasFailure = true;
+    console.log(
+      `${bgOk ? "OK " : "NG "} ${mode} ${selector} background ${bgValue ?? "(未指定)"} (期待: var(${bg}))`
+    );
+    console.log(
+      `${colorOk ? "OK " : "NG "} ${mode} ${selector} color ${color ?? "(未指定)"} (白文字前提)`
+    );
   }
-  const bgValue = lastValue(rules, ["background", "background-color"]);
-  const bgOk = bgValue === `var(${bg})`;
-  const color = lastValue(rules, ["color"]);
-  const colorOk = color !== undefined && WHITE_VALUES.has(color);
-  if (!bgOk || !colorOk) hasFailure = true;
-  console.log(
-    `${bgOk ? "OK " : "NG "} ${selector} background ${bgValue ?? "(未指定)"} (期待: var(${bg}))`
-  );
-  console.log(
-    `${colorOk ? "OK " : "NG "} ${selector} color ${color ?? "(未指定)"} (白文字前提)`
-  );
 }
 
 if (hasFailure) {
