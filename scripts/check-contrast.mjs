@@ -13,9 +13,8 @@ const CSS_PATH = fileURLToPath(
 );
 const MIN_CONTRAST = 4.5;
 const TOKENS = ["--color-cta-bg", "--color-cta-bg-hover"];
-// 背景トークンを白文字前提で検査しているため、これらのセレクタの文字色も
+// 背景トークンを白文字前提で検査しているため、CTA / skip-link の文字色も
 // 白であることを前提条件として検証する (#128)。
-const WHITE_TEXT_SELECTORS = [".cta-primary", ".skip-link"];
 const WHITE_VALUES = new Set(["#fff", "#ffffff", "white"]);
 
 function relativeLuminance(hex) {
@@ -150,18 +149,79 @@ for (const { name, decls } of modes) {
   }
 }
 
-for (const selector of WHITE_TEXT_SELECTORS) {
-  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const block = css.match(new RegExp(`(?:^|})\\s*${escaped}\\s*{([^}]*)}`));
-  if (!block) {
+// 通常プロパティ (color / background など) の宣言を後勝ちで返す。
+function parseProps(body) {
+  const props = new Map();
+  for (const decl of body.split(";")) {
+    const idx = decl.indexOf(":");
+    if (idx < 0) continue;
+    const name = decl.slice(0, idx).trim().toLowerCase();
+    if (!name || name.startsWith("--")) continue;
+    props.set(
+      name,
+      decl
+        .slice(idx + 1)
+        .replace(/\s*!important\s*$/i, "")
+        .trim()
+        .toLowerCase()
+    );
+  }
+  return props;
+}
+
+// セレクタに一致するルールの宣言を、@media 内も含めてソース順に集める。
+function collectRules(source, selector) {
+  const rules = [];
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (prelude.startsWith("@media")) {
+      rules.push(...collectRules(body, selector));
+    } else if (prelude.split(",").some((s) => s.trim() === selector)) {
+      rules.push(parseProps(body));
+    }
+  }
+  return rules;
+}
+
+function lastValue(rules, names) {
+  let value;
+  for (const props of rules) {
+    for (const name of names) {
+      if (props.has(name)) value = props.get(name);
+    }
+  }
+  return value;
+}
+
+// 各セレクタの実効背景が検査対象トークンを参照し、実効文字色が白であることを
+// 後続ルールによる上書きも含めて検証する (#140)。
+const WHITE_TEXT_TARGETS = [
+  { selector: ".cta-primary", bg: "--color-cta-bg" },
+  {
+    selector: ".cta-primary:hover",
+    bg: "--color-cta-bg-hover",
+    base: ".cta-primary",
+  },
+  { selector: ".skip-link", bg: "--color-cta-bg" },
+];
+
+for (const { selector, bg, base } of WHITE_TEXT_TARGETS) {
+  const rules = [
+    ...(base ? collectRules(css, base) : []),
+    ...collectRules(css, selector),
+  ];
+  if (collectRules(css, selector).length === 0) {
     throw new Error(`${selector} のルールが見つかりません`);
   }
-  const color = block[1].match(/(?:^|[;\s])color\s*:\s*([^;]+?)\s*(?:;|$)/);
-  const value = color?.[1].toLowerCase();
-  const ok = value !== undefined && WHITE_VALUES.has(value);
-  if (!ok) hasFailure = true;
+  const bgValue = lastValue(rules, ["background", "background-color"]);
+  const bgOk = bgValue === `var(${bg})`;
+  const color = lastValue(rules, ["color"]);
+  const colorOk = color !== undefined && WHITE_VALUES.has(color);
+  if (!bgOk || !colorOk) hasFailure = true;
   console.log(
-    `${ok ? "OK " : "NG "} ${selector} color ${value ?? "(未指定)"} (白文字前提)`
+    `${bgOk ? "OK " : "NG "} ${selector} background ${bgValue ?? "(未指定)"} (期待: var(${bg}))`
+  );
+  console.log(
+    `${colorOk ? "OK " : "NG "} ${selector} color ${color ?? "(未指定)"} (白文字前提)`
   );
 }
 

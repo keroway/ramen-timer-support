@@ -169,6 +169,53 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "cta_primary_trailing_white_background",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  background: #ffffff;\n  color: #fff;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "白文字前提",
+  },
+  {
+    name: "cta_primary_direct_white_background",
+    css: CSS_SOURCE.replace(
+      ".cta-primary {\n  display: inline-block;\n  background: var(--color-cta-bg);",
+      ".cta-primary {\n  display: inline-block;\n  background: #ffffff;"
+    ),
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_trailing_background_color_override",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  background-color: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_hover_direct_white_background",
+    css: CSS_SOURCE.replace(
+      "  background: var(--color-cta-bg-hover);",
+      "  background: #ffffff;"
+    ),
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_hover_black_text",
+    css: `${CSS_SOURCE}\n.cta-primary:hover {\n  color: #000;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_dark_media_white_background",
+    css: `${CSS_SOURCE}\n${DARK_MEDIA}\n  .cta-primary {\n    background: #ffffff;\n  }\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "skip_link_trailing_white_background",
+    css: `${CSS_SOURCE}\n.skip-link {\n  background: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_trailing_same_token_background",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  background: var(--color-cta-bg);\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "dark_omitted_token_resolves_from_common_root",
     css: CSS_SOURCE.replace(DARK_HOVER_DECL, ""),
     expectedExitCode: 0,
