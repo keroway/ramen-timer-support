@@ -72,8 +72,13 @@ function parseAttrs(attrs) {
 
 export function findViolations(html, siteOrigin) {
   const violations = [];
-  const re = /<script\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/script\s*>/gi;
+  // HTML コメントは実行されないので、script と同じ正規表現の選択肢として先頭から
+  // 順に消費し読み飛ばす。script 本文中の "<!--" はその script が先に消費される (#144)。
+  // 閉じていないコメントは仕様どおり入力末尾まで、"<!-->" / "<!--->" は空コメント。
+  const re =
+    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<script\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/script\s*>/gi;
   for (const m of html.matchAll(re)) {
+    if (m[1] === undefined) continue;
     const attrs = parseAttrs(m[1]);
     const body = m[2];
     const type = (attrs.get("type") ?? "").trim().toLowerCase();

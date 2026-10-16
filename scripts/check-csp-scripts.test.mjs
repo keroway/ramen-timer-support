@@ -87,3 +87,32 @@ test("属性順序が違っても src と type を正しく読む (#139)", () =>
   );
   assert.deepEqual(findViolations(html, SITE), []);
 });
+
+test("HTML コメント内の script は対象外 (#144)", () => {
+  const html = page(`<!-- <script>alert(1)</script> -->`);
+  assert.deepEqual(findViolations(html, SITE), []);
+});
+
+test("コメント終了後の本物の script は検出する (#144)", () => {
+  const html = page(`<!-- <script>a()</script> --><script>alert(1)</script>`);
+  assert.equal(findViolations(html, SITE).length, 1);
+});
+
+test("script 本文中の <!-- でコメント扱いにならず後続を検出する (#144)", () => {
+  const html = page(
+    `<script type="module" src="/_astro/a.js"></script><script>var a = "<!--";</script><script>b()</script>`
+  );
+  assert.equal(findViolations(html, SITE).length, 2);
+});
+
+test("空コメントと閉じていないコメントを仕様どおり扱う (#144)", () => {
+  assert.equal(
+    findViolations(page(`<!--><script>a()</script>`), SITE).length,
+    1
+  );
+  assert.equal(
+    findViolations(page(`<!---><script>a()</script>`), SITE).length,
+    1
+  );
+  assert.deepEqual(findViolations(page(`<!-- <script>a()</script>`), SITE), []);
+});
