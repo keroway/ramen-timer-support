@@ -56,25 +56,29 @@ function decodeCharRefs(value) {
   );
 }
 
-function attr(attrs, name) {
-  const re = new RegExp(
-    `(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`,
-    "i"
-  );
-  const m = re.exec(attrs);
-  const raw = m ? (m[1] ?? m[2] ?? m[3]) : undefined;
-  return raw === undefined ? undefined : decodeCharRefs(raw);
+// 属性列を先頭から順に走査し、引用符内の文字列を別属性として拾わない (#139)。
+// 同名属性が重複した場合は HTML 仕様どおり最初のものを採用する。
+function parseAttrs(attrs) {
+  const map = new Map();
+  const re = /([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g;
+  for (const m of attrs.matchAll(re)) {
+    const name = m[1].toLowerCase();
+    if (map.has(name)) continue;
+    const raw = m[2] ?? m[3] ?? m[4] ?? "";
+    map.set(name, decodeCharRefs(raw));
+  }
+  return map;
 }
 
 export function findViolations(html, siteOrigin) {
   const violations = [];
-  const re = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+  const re = /<script\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/script\s*>/gi;
   for (const m of html.matchAll(re)) {
-    const attrs = m[1];
+    const attrs = parseAttrs(m[1]);
     const body = m[2];
-    const type = (attr(attrs, "type") ?? "").trim().toLowerCase();
+    const type = (attrs.get("type") ?? "").trim().toLowerCase();
     if (!JS_TYPES.has(type)) continue;
-    const src = attr(attrs, "src");
+    const src = attrs.get("src");
     if (src === undefined) {
       violations.push(
         "インラインスクリプトは script-src 'self' で拒否されます" +
