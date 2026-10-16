@@ -66,3 +66,24 @@ test("実行されないデータブロックは通る", () => {
   const html = page('<script type="application/ld+json">{"a":1}</script>');
   assert.deepEqual(findViolations(html, SITE), []);
 });
+
+test("別属性の引用符内の偽 src に惑わされず別オリジンを拒否する (#139)", () => {
+  const html = page(
+    '<script data-note=" src=/_astro/safe.js" src="https://example.invalid/app.js"></script>'
+  );
+  assert.equal(findViolations(html, SITE).length, 1);
+});
+
+test("別属性の引用符内の偽 type に惑わされずインラインを拒否する (#139)", () => {
+  const html = page(
+    '<script data-note=" type=application/json">alert(1)</script>'
+  );
+  assert.equal(findViolations(html, SITE).length, 1);
+});
+
+test("属性順序が違っても src と type を正しく読む (#139)", () => {
+  const html = page(
+    `<script src="/_astro/a.js" data-x="y" type="module"></script><script data-x='>' type="application/ld+json">{}</script>`
+  );
+  assert.deepEqual(findViolations(html, SITE), []);
+});
