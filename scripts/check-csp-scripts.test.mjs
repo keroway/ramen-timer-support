@@ -116,3 +116,37 @@ test("空コメントと閉じていないコメントを仕様どおり扱う (
   );
   assert.deepEqual(findViolations(page(`<!-- <script>a()</script>`), SITE), []);
 });
+
+test("JavaScript の互換 MIME type のインラインと別オリジン src を拒否する (#147)", () => {
+  for (const type of [
+    "text/javascript1.5",
+    "application/x-javascript",
+    "text/jscript",
+    "text/livescript",
+    "application/x-ecmascript",
+    "TEXT/X-JAVASCRIPT",
+  ]) {
+    assert.equal(
+      findViolations(page(`<script type="${type}">a()</script>`), SITE).length,
+      1,
+      `${type} inline`
+    );
+    assert.equal(
+      findViolations(
+        page(
+          `<script type="${type}" src="https://example.invalid/a.js"></script>`
+        ),
+        SITE
+      ).length,
+      1,
+      `${type} src`
+    );
+  }
+});
+
+test("互換 MIME type でも同一オリジン src とデータブロックは通る (#147)", () => {
+  const html = page(
+    '<script type="text/javascript1.5" src="/_astro/a.js"></script><script type="application/json">{}</script>'
+  );
+  assert.deepEqual(findViolations(html, SITE), []);
+});

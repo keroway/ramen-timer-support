@@ -11,13 +11,27 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const DIST = join(ROOT, "dist");
+// HTML Standard の「JavaScript MIME type essence match」に列挙された互換 type (#147)。
+// ここに無い type は実行されないデータブロックとして扱う。
 const JS_TYPES = new Set([
   "",
   "module",
-  "text/javascript",
-  "application/javascript",
-  "text/ecmascript",
   "application/ecmascript",
+  "application/javascript",
+  "application/x-ecmascript",
+  "application/x-javascript",
+  "text/ecmascript",
+  "text/javascript",
+  "text/javascript1.0",
+  "text/javascript1.1",
+  "text/javascript1.2",
+  "text/javascript1.3",
+  "text/javascript1.4",
+  "text/javascript1.5",
+  "text/jscript",
+  "text/livescript",
+  "text/x-ecmascript",
+  "text/x-javascript",
 ]);
 
 export function readSiteOrigin() {
