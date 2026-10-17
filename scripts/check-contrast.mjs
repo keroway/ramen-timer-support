@@ -94,28 +94,70 @@ function parseBlocks(source) {
 }
 
 const DARK_MEDIA = /^@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)$/;
+const LIGHT_MEDIA = /^@media\s*\(\s*prefers-color-scheme\s*:\s*light\s*\)$/;
 
-// :root の宣言を CSS 全体から出現順に解決する (#127, #129)。
-// ライトは無条件の :root のみ、ダークはそれに加えてダーク条件内の :root を
-// 同じソース順で重ねる（後勝ち）。他セレクタの同名プロパティは混入させない (#123)。
-function collectModes(source) {
-  const light = new Map();
-  const dark = new Map();
-  let hasLightRoot = false;
-  let hasDarkRoot = false;
+// @media の prelude が指定モードに適用されるか。配色条件のみモードで切り分け、
+// それ以外の条件 (幅・印刷など) は呼び出し側が variant として個別に扱う (#143, #151)。
+function schemeAppliesTo(prelude, mode) {
+  if (DARK_MEDIA.test(prelude)) return mode === "dark";
+  if (LIGHT_MEDIA.test(prelude)) return mode === "light";
+  return null;
+}
+
+// 配色条件以外の @media の prelude を、入れ子も含めて重複なく集める。
+function collectConditions(source, found = new Set()) {
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (!prelude.startsWith("@media")) continue;
+    if (!DARK_MEDIA.test(prelude) && !LIGHT_MEDIA.test(prelude)) {
+      found.add(prelude);
+    }
+    collectConditions(body, found);
+  }
+  return found;
+}
+
+// 指定モード・指定条件 (null = 条件なし) で適用される :root の宣言を、ソース順に
+// 後勝ちで重ねる。条件付き @media は condition と一致するときだけ適用する。
+// 他セレクタの同名プロパティは混入させない (#123)。
+function applyRoots(source, mode, condition, decls, seen) {
   for (const { prelude, body } of parseBlocks(source)) {
     if (prelude === ":root") {
-      hasLightRoot = true;
-      for (const [k, v] of parseDeclarations(body)) {
-        light.set(k, v);
-        dark.set(k, v);
+      seen.root = true;
+      for (const [k, v] of parseDeclarations(body)) decls.set(k, v);
+    } else if (prelude.startsWith("@media")) {
+      const scheme = schemeAppliesTo(prelude, mode);
+      if (scheme === false) continue;
+      if (scheme === null && prelude !== condition) continue;
+      if (scheme === true)
+        seen[mode === "dark" ? "darkRoot" : "lightRoot"] = true;
+      applyRoots(body, mode, condition, decls, seen);
+    }
+  }
+}
+
+// :root の宣言を CSS 全体から出現順に解決する (#127, #129, #151)。
+// light / dark の各モードに、配色以外の @media 条件ごとの variant（条件なし + 各条件）を
+// 掛け合わせて検査する。条件が満たされない場合と満たされる場合の両方を見るため、
+// 幅条件内の上書きも、それが外れた状態の元の値も見逃さない。
+function collectModes(source) {
+  const conditions = [null, ...collectConditions(source)];
+  const modes = [];
+  let hasLightRoot = false;
+  let hasDarkRoot = false;
+  for (const mode of ["light", "dark"]) {
+    for (const condition of conditions) {
+      const decls = new Map();
+      const seen = {};
+      applyRoots(source, mode, condition, decls, seen);
+      if (condition === null) {
+        if (seen.root) hasLightRoot = true;
+        if (mode === "dark" && seen.darkRoot) hasDarkRoot = true;
       }
-    } else if (DARK_MEDIA.test(prelude)) {
-      for (const inner of parseBlocks(body)) {
-        if (inner.prelude !== ":root") continue;
-        hasDarkRoot = true;
-        for (const [k, v] of parseDeclarations(inner.body)) dark.set(k, v);
-      }
+      modes.push({
+        name: condition === null ? mode : `${mode} ${condition}`,
+        mode,
+        decls,
+      });
     }
   }
   if (!hasLightRoot) {
@@ -124,10 +166,7 @@ function collectModes(source) {
   if (!hasDarkRoot) {
     throw new Error("ダークモードの :root ブロックが見つかりません");
   }
-  return [
-    { name: "light", decls: light },
-    { name: "dark", decls: dark },
-  ];
+  return modes;
 }
 
 const css = stripComments(readFileSync(CSS_PATH, "utf8"));
@@ -176,14 +215,10 @@ function parseProps(body) {
   return props;
 }
 
-const LIGHT_MEDIA = /^@media\s*\(\s*prefers-color-scheme\s*:\s*light\s*\)$/;
-
 // @media の prelude が指定モードに適用されるか。配色条件のみモードで切り分け、
 // それ以外の条件 (幅・印刷など) は両モードに適用されるものとして扱う (#143)。
 function mediaAppliesTo(prelude, mode) {
-  if (DARK_MEDIA.test(prelude)) return mode === "dark";
-  if (LIGHT_MEDIA.test(prelude)) return mode === "light";
-  return true;
+  return schemeAppliesTo(prelude, mode) !== false;
 }
 
 // セレクタに一致するルールの宣言を、指定モードに適用される @media 内も含めて
@@ -224,7 +259,7 @@ const WHITE_TEXT_TARGETS = [
   { selector: ".skip-link", bg: "--color-cta-bg" },
 ];
 
-for (const { name: mode } of modes) {
+for (const mode of ["light", "dark"]) {
   for (const { selector, bg, base } of WHITE_TEXT_TARGETS) {
     const own = collectRules(css, selector, mode);
     if (own.length === 0) {

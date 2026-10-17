@@ -268,6 +268,42 @@ const CASES = [
     expectedExitCode: 1,
   },
   {
+    name: "width_media_root_white",
+    css:
+      `${CSS_SOURCE}\n@media (max-width: 600px) {\n  :root {\n` +
+      "    --color-cta-bg: #ffffff;\n    --color-cta-bg-hover: #ffffff;\n  }\n}\n",
+    expectedExitCode: 1,
+  },
+  {
+    name: "light_media_root_white",
+    css:
+      `${CSS_SOURCE}\n@media (prefers-color-scheme: light) {\n  :root {\n` +
+      "    --color-cta-bg: #ffffff;\n    --color-cta-bg-hover: #ffffff;\n  }\n}\n",
+    expectedExitCode: 1,
+  },
+  {
+    name: "width_media_root_safe",
+    css:
+      `${CSS_SOURCE}\n@media (max-width: 600px) {\n  :root {\n` +
+      "    --color-cta-bg: #7a3416;\n  }\n}\n",
+    expectedExitCode: 0,
+  },
+  {
+    name: "light_media_root_safe",
+    css:
+      `${CSS_SOURCE}\n@media (prefers-color-scheme: light) {\n  :root {\n` +
+      "    --color-cta-bg: #7a3416;\n  }\n}\n",
+    expectedExitCode: 0,
+  },
+  {
+    name: "light_media_root_white_hover_only",
+    css:
+      `${CSS_SOURCE}\n@media (prefers-color-scheme: light) {\n  :root {\n` +
+      "    --color-cta-bg-hover: #ffffff;\n  }\n}\n",
+    expectedExitCode: 1,
+    expectedStderr: "白文字との対比",
+  },
+  {
     name: "dark_omitted_token_resolves_from_common_root",
     css: CSS_SOURCE.replace(DARK_HOVER_DECL, ""),
     expectedExitCode: 0,
