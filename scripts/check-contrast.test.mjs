@@ -241,6 +241,33 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "cta_primary_important_white_background_masked_by_later_normal",
+    css:
+      `${CSS_SOURCE}\n.cta-primary {\n  background: #ffffff !important;\n}\n` +
+      ".cta-primary {\n  background: var(--color-cta-bg);\n}\n",
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_important_black_text_masked_by_later_normal",
+    css:
+      `${CSS_SOURCE}\n.cta-primary {\n  color: #000 !important;\n}\n` +
+      ".cta-primary {\n  color: #fff;\n}\n",
+    expectedExitCode: 1,
+    expectedStderr: "白文字前提",
+  },
+  {
+    name: "skip_link_important_safe_background_over_later_white_normal",
+    css:
+      `${CSS_SOURCE}\n.skip-link {\n  background: var(--color-cta-bg) !important;\n}\n` +
+      ".skip-link {\n  background: #ffffff;\n}\n",
+    expectedExitCode: 0,
+  },
+  {
+    name: "cta_primary_same_block_important_white_masked_by_normal",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  background: #ffffff !important;\n  background: var(--color-cta-bg);\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
     name: "dark_omitted_token_resolves_from_common_root",
     css: CSS_SOURCE.replace(DARK_HOVER_DECL, ""),
     expectedExitCode: 0,

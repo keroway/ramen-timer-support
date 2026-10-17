@@ -149,7 +149,14 @@ for (const { name, decls } of modes) {
   }
 }
 
-// 通常プロパティ (color / background など) の宣言を後勝ちで返す。
+// 宣言を適用する。!important は通常宣言より優先し、同じ重要度ならソース順で後勝ち (#149)。
+function applyDecl(props, name, decl) {
+  const prev = props.get(name);
+  if (prev?.important && !decl.important) return;
+  props.set(name, decl);
+}
+
+// 通常プロパティ (color / background など) の宣言を { value, important } で返す。
 function parseProps(body) {
   const props = new Map();
   for (const decl of body.split(";")) {
@@ -157,14 +164,14 @@ function parseProps(body) {
     if (idx < 0) continue;
     const name = decl.slice(0, idx).trim().toLowerCase();
     if (!name || name.startsWith("--")) continue;
-    props.set(
-      name,
-      decl
-        .slice(idx + 1)
+    const raw = decl.slice(idx + 1);
+    applyDecl(props, name, {
+      value: raw
         .replace(/\s*!important\s*$/i, "")
         .trim()
-        .toLowerCase()
-    );
+        .toLowerCase(),
+      important: /!important\s*$/i.test(raw),
+    });
   }
   return props;
 }
@@ -196,13 +203,13 @@ function collectRules(source, selector, mode) {
 }
 
 function lastValue(rules, names) {
-  let value;
+  const merged = new Map();
   for (const props of rules) {
     for (const name of names) {
-      if (props.has(name)) value = props.get(name);
+      if (props.has(name)) applyDecl(merged, "value", props.get(name));
     }
   }
-  return value;
+  return merged.get("value")?.value;
 }
 
 // 各セレクタの実効背景が検査対象トークンを参照し、実効文字色が白であることを
