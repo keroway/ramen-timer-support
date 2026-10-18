@@ -117,6 +117,34 @@ test("空コメントと閉じていないコメントを仕様どおり扱う (
   assert.deepEqual(findViolations(page(`<!-- <script>a()</script>`), SITE), []);
 });
 
+test("textarea・title 内の script 文字列は対象外で、終了後の本物は検出する (#153)", () => {
+  assert.deepEqual(
+    findViolations(
+      page(`<textarea aria-label=example><script>alert(1)</script></textarea>`),
+      SITE
+    ),
+    []
+  );
+  assert.deepEqual(
+    findViolations(
+      page(`<title>Example <script>alert(1)</script></title>`),
+      SITE
+    ),
+    []
+  );
+  assert.equal(
+    findViolations(
+      page(`<textarea><script>a()</script></textarea><script>b()</script>`),
+      SITE
+    ).length,
+    1
+  );
+  assert.equal(
+    findViolations(page(`<title>t</title><script>b()</script>`), SITE).length,
+    1
+  );
+});
+
 test("JavaScript の互換 MIME type のインラインと別オリジン src を拒否する (#147)", () => {
   for (const type of [
     "text/javascript1.5",

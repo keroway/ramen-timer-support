@@ -89,12 +89,14 @@ export function findViolations(html, siteOrigin) {
   // HTML コメントは実行されないので、script と同じ正規表現の選択肢として先頭から
   // 順に消費し読み飛ばす。script 本文中の "<!--" はその script が先に消費される (#144)。
   // 閉じていないコメントは仕様どおり入力末尾まで、"<!-->" / "<!--->" は空コメント。
+  // textarea / title は RCDATA で中身がテキスト扱いなので、対応する終了タグ
+  // (無ければ入力末尾) まで同様に読み飛ばす (#153)。
   const re =
-    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<script\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/script\s*>/gi;
+    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?:textarea|title)\b(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?(?:<\/(?:textarea|title)\s*>|$)|<script\b(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>/gi;
   for (const m of html.matchAll(re)) {
-    if (m[1] === undefined) continue;
-    const attrs = parseAttrs(m[1]);
-    const body = m[2];
+    if (m.groups.attrs === undefined) continue;
+    const attrs = parseAttrs(m.groups.attrs);
+    const body = m.groups.body;
     const type = (attrs.get("type") ?? "").trim().toLowerCase();
     if (!JS_TYPES.has(type)) continue;
     const src = attrs.get("src");
