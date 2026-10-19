@@ -104,10 +104,15 @@ function schemeAppliesTo(prelude, mode) {
   return null;
 }
 
-// 配色条件以外の @media の prelude を、入れ子も含めて重複なく集める。
+// 条件付き at-rule (@media / @supports) か。@supports も条件 variant として扱う (#157)。
+function isConditional(prelude) {
+  return prelude.startsWith("@media") || prelude.startsWith("@supports");
+}
+
+// 配色条件以外の @media / @supports の prelude を、入れ子も含めて重複なく集める。
 function collectConditions(source, found = new Set()) {
   for (const { prelude, body } of parseBlocks(source)) {
-    if (!prelude.startsWith("@media")) continue;
+    if (!isConditional(prelude)) continue;
     if (!DARK_MEDIA.test(prelude) && !LIGHT_MEDIA.test(prelude)) {
       found.add(prelude);
     }
@@ -124,7 +129,7 @@ function applyRoots(source, mode, condition, decls, seen) {
     if (prelude === ":root") {
       seen.root = true;
       for (const [k, v] of parseDeclarations(body)) decls.set(k, v);
-    } else if (prelude.startsWith("@media")) {
+    } else if (isConditional(prelude)) {
       const scheme = schemeAppliesTo(prelude, mode);
       if (scheme === false) continue;
       if (scheme === null && prelude !== condition) continue;
@@ -226,7 +231,7 @@ function mediaAppliesTo(prelude, mode) {
 function collectRules(source, selector, mode) {
   const rules = [];
   for (const { prelude, body } of parseBlocks(source)) {
-    if (prelude.startsWith("@media")) {
+    if (isConditional(prelude)) {
       if (mediaAppliesTo(prelude, mode)) {
         rules.push(...collectRules(body, selector, mode));
       }
