@@ -90,9 +90,10 @@ export function findViolations(html, siteOrigin) {
   // 順に消費し読み飛ばす。script 本文中の "<!--" はその script が先に消費される (#144)。
   // 閉じていないコメントは仕様どおり入力末尾まで、"<!-->" / "<!--->" は空コメント。
   // textarea / title は RCDATA で中身がテキスト扱いなので、対応する終了タグ
-  // (無ければ入力末尾) まで同様に読み飛ばす (#153)。
+  // (無ければ入力末尾) まで同様に読み飛ばす (#153)。終了タグは開始した要素名と
+  // 同じものだけを対象にする (#158)。
   const re =
-    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?:textarea|title)\b(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?(?:<\/(?:textarea|title)\s*>|$)|<script\b(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>/gi;
+    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?<rcdata>textarea|title)\b(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?(?:<\/\k<rcdata>\s*>|$)|<script\b(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>/gi;
   for (const m of html.matchAll(re)) {
     if (m.groups.attrs === undefined) continue;
     const attrs = parseAttrs(m.groups.attrs);
