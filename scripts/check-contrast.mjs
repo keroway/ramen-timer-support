@@ -252,7 +252,9 @@ function collectRules(source, selector, mode, condition, depth = 0) {
         )
       );
     } else if (prelude.split(",").some((s) => s.trim() === selector)) {
-      rules.push(parseProps(body));
+      const props = parseProps(body);
+      props.custom = parseDeclarations(body);
+      rules.push(props);
     }
   }
   return rules;
@@ -299,7 +301,17 @@ for (const mode of ["light", "dark"]) {
       const bgOk = bgValue === `var(${bg})`;
       const color = lastValue(rules, ["color"]);
       const colorOk = color !== undefined && WHITE_VALUES.has(color);
-      if (!bgOk || !colorOk) hasFailure = true;
+      // :root で検査したトークン値が要素上の上書きで変わらないことを保証する (#169)。
+      const overridden = TOKENS.filter((t) =>
+        rules.some((props) => props.custom.has(t))
+      );
+      const overrideOk = overridden.length === 0;
+      if (!bgOk || !colorOk || !overrideOk) hasFailure = true;
+      if (!overrideOk) {
+        console.log(
+          `NG  ${label} ${selector} ${overridden.join(", ")} を要素上で上書きしています (:root の検査値と食い違う)`
+        );
+      }
       console.log(
         `${bgOk ? "OK " : "NG "} ${label} ${selector} background ${bgValue ?? "(未指定)"} (期待: var(${bg}))`
       );
