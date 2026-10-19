@@ -231,6 +231,19 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "cta_primary_black_text_masked_by_exclusive_width_media",
+    css:
+      `${CSS_SOURCE}\n@media (max-width: 600px) {\n  .cta-primary {\n    color: #000;\n  }\n}\n` +
+      "@media (min-width: 900px) {\n  .cta-primary {\n    color: #fff;\n  }\n}\n",
+    expectedExitCode: 1,
+    expectedStderr: "白文字前提",
+  },
+  {
+    name: "cta_primary_white_text_in_width_media_safe",
+    css: `${CSS_SOURCE}\n@media (max-width: 600px) {\n  .cta-primary {\n    color: #ffffff;\n  }\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "skip_link_trailing_white_background",
     css: `${CSS_SOURCE}\n.skip-link {\n  background: #ffffff;\n}\n`,
     expectedExitCode: 1,
