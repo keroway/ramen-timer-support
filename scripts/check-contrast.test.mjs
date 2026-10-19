@@ -268,6 +268,16 @@ const CASES = [
     expectedExitCode: 1,
   },
   {
+    name: "cta_primary_same_block_shorthand_white_after_longhand",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  background-color: var(--color-cta-bg);\n  background: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_same_block_longhand_safe_after_shorthand_white",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  background: #ffffff;\n  background-color: var(--color-cta-bg);\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "width_media_root_white",
     css:
       `${CSS_SOURCE}\n@media (max-width: 600px) {\n  :root {\n` +

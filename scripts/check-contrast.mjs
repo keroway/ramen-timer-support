@@ -200,9 +200,10 @@ function applyDecl(props, name, decl) {
   props.set(name, decl);
 }
 
-// 通常プロパティ (color / background など) の宣言を { value, important } で返す。
+// 通常プロパティ (color / background など) の宣言を { value, important, order } で返す。
 function parseProps(body) {
   const props = new Map();
+  let order = 0;
   for (const decl of body.split(";")) {
     const idx = decl.indexOf(":");
     if (idx < 0) continue;
@@ -215,6 +216,7 @@ function parseProps(body) {
         .trim()
         .toLowerCase(),
       important: /!important\s*$/i.test(raw),
+      order: order++,
     });
   }
   return props;
@@ -242,12 +244,13 @@ function collectRules(source, selector, mode) {
   return rules;
 }
 
+// names 間 (background / background-color など) も、ルール内の宣言順を保って重ねる (#161)。
 function lastValue(rules, names) {
   const merged = new Map();
   for (const props of rules) {
-    for (const name of names) {
-      if (props.has(name)) applyDecl(merged, "value", props.get(name));
-    }
+    const decls = names.filter((n) => props.has(n)).map((n) => props.get(n));
+    decls.sort((a, b) => a.order - b.order);
+    for (const decl of decls) applyDecl(merged, "value", decl);
   }
   return merged.get("value")?.value;
 }
