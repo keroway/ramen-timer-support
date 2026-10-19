@@ -171,6 +171,32 @@ test("textarea・title は開始した要素と同名の終了タグまで読み
   );
 });
 
+test("通常要素の属性値内の script 文字列は対象外で、終了後の本物は検出する (#167)", () => {
+  assert.deepEqual(
+    findViolations(
+      page(`<div data-example="<script>alert(1)</script>">Example</div>`),
+      SITE
+    ),
+    []
+  );
+  assert.deepEqual(
+    findViolations(
+      page(`<div data-example='<script>alert(1)</script>'>Example</div>`),
+      SITE
+    ),
+    []
+  );
+  assert.equal(
+    findViolations(
+      page(
+        `<div data-example="<script>a()</script>">Example</div><script>b()</script>`
+      ),
+      SITE
+    ).length,
+    1
+  );
+});
+
 test("JavaScript の互換 MIME type のインラインと別オリジン src を拒否する (#147)", () => {
   for (const type of [
     "text/javascript1.5",
