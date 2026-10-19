@@ -275,6 +275,21 @@ const CASES = [
     expectedExitCode: 1,
   },
   {
+    name: "supports_root_white",
+    css:
+      `${CSS_SOURCE}\n@supports (display: grid) {\n  :root {\n` +
+      "    --color-cta-bg: #ffffff;\n    --color-cta-bg-hover: #ffffff;\n  }\n}\n",
+    expectedExitCode: 1,
+    expectedStderr: "白文字との対比",
+  },
+  {
+    name: "supports_root_safe",
+    css:
+      `${CSS_SOURCE}\n@supports (display: grid) {\n  :root {\n` +
+      "    --color-cta-bg: #7a3416;\n  }\n}\n",
+    expectedExitCode: 0,
+  },
+  {
     name: "light_media_root_white",
     css:
       `${CSS_SOURCE}\n@media (prefers-color-scheme: light) {\n  :root {\n` +
