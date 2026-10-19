@@ -155,6 +155,31 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "cta_primary_local_token_override",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  --color-cta-bg: #ffffff;\n  --color-cta-bg-hover: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_hover_local_token_override",
+    css: `${CSS_SOURCE}\n.cta-primary:hover {\n  --color-cta-bg-hover: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "skip_link_local_token_override",
+    css: `${CSS_SOURCE}\n.skip-link {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_local_token_override_in_media",
+    css: `${CSS_SOURCE}\n${DARK_MEDIA}\n  .cta-primary {\n    --color-cta-bg: #ffffff;\n  }\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_unrelated_local_property",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  --cta-shadow: 0 0 0 #000;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "trailing_dark_media_root_white",
     css:
       `${CSS_SOURCE}\n${DARK_MEDIA}\n  :root {\n` +
