@@ -293,6 +293,21 @@ const CASES = [
     expectedStderr: "白文字との対比",
   },
   {
+    name: "nested_media_supports_root_white",
+    css:
+      `${CSS_SOURCE}\n@media (max-width: 600px) {\n  @supports (display: grid) {\n    :root {\n` +
+      "      --color-cta-bg: #ffffff;\n    }\n  }\n}\n",
+    expectedExitCode: 1,
+    expectedStderr: "白文字との対比",
+  },
+  {
+    name: "nested_media_supports_root_safe",
+    css:
+      `${CSS_SOURCE}\n@media (max-width: 600px) {\n  @supports (display: grid) {\n    :root {\n` +
+      "      --color-cta-bg: #7a3416;\n    }\n  }\n}\n",
+    expectedExitCode: 0,
+  },
+  {
     name: "supports_root_safe",
     css:
       `${CSS_SOURCE}\n@supports (display: grid) {\n  :root {\n` +
