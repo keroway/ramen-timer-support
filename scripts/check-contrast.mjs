@@ -109,22 +109,24 @@ function isConditional(prelude) {
   return prelude.startsWith("@media") || prelude.startsWith("@supports");
 }
 
-// 配色条件以外の @media / @supports の prelude を、入れ子も含めて重複なく集める。
-function collectConditions(source, found = new Set()) {
+// 配色条件以外の @media / @supports の入れ子の連なり (外側 -> 内側の prelude 配列) を、
+// 途中経路も含めて重複なく集める。入れ子条件は同時成立する経路ごとに別 variant で
+// 検査する (#163)。キーは " > " 連結。
+function collectConditions(source, chain = [], found = new Map()) {
   for (const { prelude, body } of parseBlocks(source)) {
     if (!isConditional(prelude)) continue;
-    if (!DARK_MEDIA.test(prelude) && !LIGHT_MEDIA.test(prelude)) {
-      found.add(prelude);
-    }
-    collectConditions(body, found);
+    const isScheme = DARK_MEDIA.test(prelude) || LIGHT_MEDIA.test(prelude);
+    const next = isScheme ? chain : [...chain, prelude];
+    if (!isScheme) found.set(next.join(" > "), next);
+    collectConditions(body, next, found);
   }
   return found;
 }
 
-// 指定モード・指定条件 (null = 条件なし) で適用される :root の宣言を、ソース順に
-// 後勝ちで重ねる。条件付き @media は condition と一致するときだけ適用する。
-// 他セレクタの同名プロパティは混入させない (#123)。
-function applyRoots(source, mode, condition, decls, seen) {
+// 指定モード・指定条件 (条件の連なり。空 = 条件なし) で適用される :root の宣言を、
+// ソース順に後勝ちで重ねる。配色以外の条件付き at-rule は、入れ子の外側から順に
+// condition と一致するときだけ適用する。他セレクタの同名プロパティは混入させない (#123)。
+function applyRoots(source, mode, condition, decls, seen, depth = 0) {
   for (const { prelude, body } of parseBlocks(source)) {
     if (prelude === ":root") {
       seen.root = true;
@@ -132,10 +134,17 @@ function applyRoots(source, mode, condition, decls, seen) {
     } else if (isConditional(prelude)) {
       const scheme = schemeAppliesTo(prelude, mode);
       if (scheme === false) continue;
-      if (scheme === null && prelude !== condition) continue;
+      if (scheme === null && prelude !== condition[depth]) continue;
       if (scheme === true)
         seen[mode === "dark" ? "darkRoot" : "lightRoot"] = true;
-      applyRoots(body, mode, condition, decls, seen);
+      applyRoots(
+        body,
+        mode,
+        condition,
+        decls,
+        seen,
+        scheme === null ? depth + 1 : depth
+      );
     }
   }
 }
@@ -145,7 +154,7 @@ function applyRoots(source, mode, condition, decls, seen) {
 // 掛け合わせて検査する。条件が満たされない場合と満たされる場合の両方を見るため、
 // 幅条件内の上書きも、それが外れた状態の元の値も見逃さない。
 function collectModes(source) {
-  const conditions = [null, ...collectConditions(source)];
+  const conditions = [[], ...collectConditions(source).values()];
   const modes = [];
   let hasLightRoot = false;
   let hasDarkRoot = false;
@@ -154,12 +163,13 @@ function collectModes(source) {
       const decls = new Map();
       const seen = {};
       applyRoots(source, mode, condition, decls, seen);
-      if (condition === null) {
+      if (condition.length === 0) {
         if (seen.root) hasLightRoot = true;
         if (mode === "dark" && seen.darkRoot) hasDarkRoot = true;
       }
       modes.push({
-        name: condition === null ? mode : `${mode} ${condition}`,
+        name:
+          condition.length === 0 ? mode : `${mode} ${condition.join(" > ")}`,
         mode,
         decls,
       });
