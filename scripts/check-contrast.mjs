@@ -355,6 +355,14 @@ for (const { selector, token } of findAncestorOverrides(css)) {
   );
 }
 
+// @layer はレイヤー順によるカスケードを解析しておらず、内側の宣言を黙って無視して
+// しまうため、未対応構文として明示的に失敗させる (#175)。
+if (/@layer\b/i.test(css)) {
+  throw new Error(
+    "@layer は未対応です (レイヤー内の上書きを検査できないため拒否します)"
+  );
+}
+
 if (hasFailure) {
   console.error(
     `\n白文字との対比が ${MIN_CONTRAST}:1 未満のトークン、または白文字前提に反する文字色があります。`
