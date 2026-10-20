@@ -175,6 +175,22 @@ const CASES = [
     expectedExitCode: 1,
   },
   {
+    name: "body_token_override_white",
+    css: `${CSS_SOURCE}\nbody {\n  --color-cta-bg: #ffffff;\n  --color-cta-bg-hover: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "白文字との対比",
+  },
+  {
+    name: "body_token_override_in_media",
+    css: `${CSS_SOURCE}\n${DARK_MEDIA}\n  body {\n    --color-cta-bg: #7a3416;\n  }\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "body_unrelated_custom_property",
+    css: `${CSS_SOURCE}\nbody {\n  --page-gap: 8px;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "cta_primary_unrelated_local_property",
     css: `${CSS_SOURCE}\n.cta-primary {\n  --cta-shadow: 0 0 0 #000;\n}\n`,
     expectedExitCode: 0,
