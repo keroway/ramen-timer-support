@@ -322,6 +322,34 @@ for (const mode of ["light", "dark"]) {
   }
 }
 
+// body / html / main など祖先になりうる要素型セレクタ (と *) 上の背景トークン上書きは、
+// :root の検査値と食い違ったまま CTA に継承されるため拒否する (#171)。クラス等の
+// 祖先は HTML を見ないと判定できないので対象外 (要素自身は上記 #169 で検査済み)。
+const TYPE_SELECTOR = /^(\*|[a-z][a-z0-9-]*)$/i;
+
+function findAncestorOverrides(source, found = []) {
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (isConditional(prelude)) {
+      findAncestorOverrides(body, found);
+      continue;
+    }
+    const selectors = prelude.split(",").map((s) => s.trim());
+    if (!selectors.some((s) => TYPE_SELECTOR.test(s))) continue;
+    const decls = parseDeclarations(body);
+    for (const token of TOKENS) {
+      if (decls.has(token)) found.push({ selector: prelude, token });
+    }
+  }
+  return found;
+}
+
+for (const { selector, token } of findAncestorOverrides(css)) {
+  hasFailure = true;
+  console.log(
+    `NG  ${selector} が ${token} を上書きしています (祖先経由で継承され :root の検査値と食い違う)`
+  );
+}
+
 if (hasFailure) {
   console.error(
     `\n白文字との対比が ${MIN_CONTRAST}:1 未満のトークン、または白文字前提に反する文字色があります。`
