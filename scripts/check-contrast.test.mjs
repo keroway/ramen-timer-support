@@ -155,6 +155,21 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "root_important_white_masked_by_later_normal_root",
+    css: `${CSS_SOURCE}\n:root {\n  --color-cta-bg: #ffffff !important;\n}\n:root {\n  --color-cta-bg: #8b3d1a;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "root_important_safe_over_later_white_normal_root",
+    css: `${CSS_SOURCE}\n:root {\n  --color-cta-bg: #8b3d1a !important;\n}\n:root {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
+    name: "root_same_block_important_white_masked_by_normal",
+    css: `${CSS_SOURCE}\n:root {\n  --color-cta-bg: #ffffff !important;\n  --color-cta-bg: #8b3d1a;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
     name: "cta_primary_local_token_override",
     css: `${CSS_SOURCE}\n.cta-primary {\n  --color-cta-bg: #ffffff;\n  --color-cta-bg-hover: #ffffff;\n}\n`,
     expectedExitCode: 1,
