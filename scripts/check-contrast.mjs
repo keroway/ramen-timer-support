@@ -35,12 +35,17 @@ function stripComments(source) {
   return source.replace(/\/\*[\s\S]*?\*\//g, "");
 }
 
+// カスタムプロパティの宣言を { value, important } で返す。!important は通常宣言より
+// 優先し、同じ重要度ならソース順で後勝ち (#173)。
 function parseDeclarations(block) {
   const decls = new Map();
   for (const match of stripComments(block).matchAll(
     /(--[\w-]+)\s*:\s*([^;]+);/g
   )) {
-    decls.set(match[1], match[2].trim());
+    applyDecl(decls, match[1], {
+      value: match[2].replace(/\s*!important\s*$/i, "").trim(),
+      important: /!important\s*$/i.test(match[2]),
+    });
   }
   return decls;
 }
@@ -59,7 +64,7 @@ function resolve(decls, value) {
     if (!decls.has(name)) {
       throw new Error(`未定義のカスタムプロパティを参照しています: ${name}`);
     }
-    current = decls.get(name);
+    current = decls.get(name).value;
   }
   if (!/^#[0-9a-fA-F]{6}$/.test(current)) {
     throw new Error(`16進カラー以外は未対応です: ${current}`);
@@ -130,7 +135,7 @@ function applyRoots(source, mode, condition, decls, seen, depth = 0) {
   for (const { prelude, body } of parseBlocks(source)) {
     if (prelude === ":root") {
       seen.root = true;
-      for (const [k, v] of parseDeclarations(body)) decls.set(k, v);
+      for (const [k, v] of parseDeclarations(body)) applyDecl(decls, k, v);
     } else if (isConditional(prelude)) {
       const scheme = schemeAppliesTo(prelude, mode);
       if (scheme === false) continue;
@@ -193,7 +198,7 @@ for (const { name, decls } of modes) {
     if (!decls.has(token)) {
       throw new Error(`${name} モードに ${token} がありません`);
     }
-    const hex = resolve(decls, decls.get(token));
+    const hex = resolve(decls, decls.get(token).value);
     const ratio = contrastWithWhite(hex);
     const ok = ratio >= MIN_CONTRAST;
     if (!ok) hasFailure = true;
