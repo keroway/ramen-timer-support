@@ -52,6 +52,18 @@ assert.ok(
 const CASES = [
   { name: "baseline", css: CSS_SOURCE, expectedExitCode: 0 },
   {
+    name: "cta_primary_black_important_unlayered",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  color: black !important;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "白文字前提",
+  },
+  {
+    name: "cta_primary_black_important_in_layer",
+    css: `${CSS_SOURCE}\n@layer regression {\n  .cta-primary {\n    color: black !important;\n  }\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "@layer は未対応",
+  },
+  {
     name: "white_hover",
     css: CSS_SOURCE.replace(OLD_HOVER_DECL, "  --color-cta-bg-hover: #ffffff;"),
     expectedExitCode: 1,
