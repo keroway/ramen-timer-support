@@ -182,6 +182,27 @@ const CASES = [
     expectedExitCode: 1,
   },
   {
+    name: "root_white_without_trailing_semicolon",
+    css: `${CSS_SOURCE}\n:root {\n  --color-cta-bg: #ffffff\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "白文字との対比",
+  },
+  {
+    name: "cta_primary_white_token_without_trailing_semicolon",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  --color-cta-bg: #ffffff\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "body_white_token_without_trailing_semicolon",
+    css: `${CSS_SOURCE}\nbody {\n  --color-cta-bg: #ffffff\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "root_safe_without_trailing_semicolon",
+    css: `${CSS_SOURCE}\n:root {\n  --color-cta-bg: #7a3416\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "cta_primary_local_token_override",
     css: `${CSS_SOURCE}\n.cta-primary {\n  --color-cta-bg: #ffffff;\n  --color-cta-bg-hover: #ffffff;\n}\n`,
     expectedExitCode: 1,

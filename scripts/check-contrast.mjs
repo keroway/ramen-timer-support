@@ -40,7 +40,7 @@ function stripComments(source) {
 function parseDeclarations(block) {
   const decls = new Map();
   for (const match of stripComments(block).matchAll(
-    /(--[\w-]+)\s*:\s*([^;]+);/g
+    /(--[\w-]+)\s*:\s*([^;]+)(?:;|$)/g
   )) {
     applyDecl(decls, match[1], {
       value: match[2].replace(/\s*!important\s*$/i, "").trim(),
