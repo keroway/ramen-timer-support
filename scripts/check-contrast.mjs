@@ -286,6 +286,17 @@ const WHITE_TEXT_TARGETS = [
     base: ".cta-primary",
   },
   { selector: ".skip-link", bg: "--color-cta-bg" },
+  // フォーカス状態もベース宣言に重ねて解決し、白背景などへの上書きを検知する (#181)。
+  {
+    selector: ".cta-primary:focus-visible",
+    bg: "--color-cta-bg",
+    base: ".cta-primary",
+  },
+  {
+    selector: ".skip-link:focus",
+    bg: "--color-cta-bg",
+    base: ".skip-link",
+  },
 ];
 
 const conditions = [[], ...collectConditions(css).values()];
