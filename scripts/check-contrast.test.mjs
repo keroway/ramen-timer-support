@@ -452,6 +452,21 @@ const CASES = [
     expectedStderr: "白文字との対比",
   },
   {
+    name: "cta_primary_focus_visible_white_on_white",
+    css: `${CSS_SOURCE}\n.cta-primary:focus-visible {\n  background: #ffffff;\n  color: #fff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "skip_link_focus_white_on_white",
+    css: `${CSS_SOURCE}\n.skip-link:focus {\n  background: #ffffff;\n  color: #fff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_focus_visible_outline_only_safe",
+    css: `${CSS_SOURCE}\n.cta-primary:focus-visible {\n  outline: 3px solid #000;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "dark_omitted_token_resolves_from_common_root",
     css: CSS_SOURCE.replace(DARK_HOVER_DECL, ""),
     expectedExitCode: 0,
