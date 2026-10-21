@@ -64,6 +64,12 @@ const CASES = [
     expectedStderr: "@layer は未対応",
   },
   {
+    name: "cta_primary_descendant_selector_white_background",
+    css: `${CSS_SOURCE}\n.card .cta-primary {\n  color: #ffffff;\n  background: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "未対応のセレクタ",
+  },
+  {
     name: "white_hover",
     css: CSS_SOURCE.replace(OLD_HOVER_DECL, "  --color-cta-bg-hover: #ffffff;"),
     expectedExitCode: 1,
