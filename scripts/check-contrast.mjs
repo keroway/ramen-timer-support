@@ -363,6 +363,45 @@ if (/@layer\b/i.test(css)) {
   );
 }
 
+// collectRules はセレクタ文字列の完全一致で宣言を集めるため、`.card .cta-primary` の
+// ような子孫・複合セレクタによる配色上書きを検査できない。対象クラスを含む未対応の
+// セレクタが配色を指定していたら、黙って見逃さず明示的に失敗させる (#179)。
+const TARGET_CLASSES = [".cta-primary", ".skip-link"];
+const KNOWN_SELECTORS = new Set([
+  ...WHITE_TEXT_TARGETS.map((t) => t.selector),
+  ".cta-primary:focus-visible",
+  ".skip-link:focus",
+]);
+const COLOR_PROPS = ["color", "background", "background-color"];
+
+function findUnsupportedTargetRules(source, found = []) {
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (isConditional(prelude)) {
+      findUnsupportedTargetRules(body, found);
+      continue;
+    }
+    const props = parseProps(body);
+    const setsColor =
+      COLOR_PROPS.some((n) => props.has(n)) ||
+      TOKENS.some((t) => parseDeclarations(body).has(t));
+    if (!setsColor) continue;
+    for (const part of prelude.split(",").map((s) => s.trim())) {
+      const mentionsTarget = TARGET_CLASSES.some((c) =>
+        new RegExp(`${c.replace(".", "\\.")}(?![\\w-])`).test(part)
+      );
+      if (mentionsTarget && !KNOWN_SELECTORS.has(part)) found.push(part);
+    }
+  }
+  return found;
+}
+
+const unsupported = findUnsupportedTargetRules(css);
+if (unsupported.length > 0) {
+  throw new Error(
+    `未対応のセレクタが CTA / skip-link の配色を指定しています (子孫・複合セレクタは検査できないため拒否します): ${unsupported.join(", ")}`
+  );
+}
+
 if (hasFailure) {
   console.error(
     `\n白文字との対比が ${MIN_CONTRAST}:1 未満のトークン、または白文字前提に反する文字色があります。`
