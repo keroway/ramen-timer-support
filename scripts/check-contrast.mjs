@@ -382,6 +382,27 @@ if (/@container\b/i.test(css)) {
   );
 }
 
+// CSS ネスト (`.cta-primary { & { ... } }` など) は parseBlocks が外側のブロックしか
+// 返さず、内側の配色宣言を解析できず黙って無視してしまうため、通常ルール内に
+// 波括弧が入れ子になっていたら未対応構文として明示的に失敗させる (#185)。
+function findNestedStyleRules(source, found = []) {
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (isConditional(prelude)) {
+      findNestedStyleRules(body, found);
+    } else if (!prelude.startsWith("@") && body.includes("{")) {
+      found.push(prelude);
+    }
+  }
+  return found;
+}
+
+const nested = findNestedStyleRules(css);
+if (nested.length > 0) {
+  throw new Error(
+    `CSS ネストは未対応です (ネスト内の配色変更を検査できないため拒否します): ${nested.join(", ")}`
+  );
+}
+
 // collectRules はセレクタ文字列の完全一致で宣言を集めるため、`.card .cta-primary` の
 // ような子孫・複合セレクタによる配色上書きを検査できない。対象クラスを含む未対応の
 // セレクタが配色を指定していたら、黙って見逃さず明示的に失敗させる (#179)。
