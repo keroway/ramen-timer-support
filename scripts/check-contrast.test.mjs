@@ -76,6 +76,17 @@ const CASES = [
     expectedStderr: "未対応のセレクタ",
   },
   {
+    name: "cta_primary_nested_white_background",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  & {\n    background: #ffffff;\n    color: #fff;\n  }\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "CSS ネストは未対応",
+  },
+  {
+    name: "safe_unrelated_rule_after_baseline",
+    css: `${CSS_SOURCE}\n.unrelated {\n  color: #333;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "white_hover",
     css: CSS_SOURCE.replace(OLD_HOVER_DECL, "  --color-cta-bg-hover: #ffffff;"),
     expectedExitCode: 1,
