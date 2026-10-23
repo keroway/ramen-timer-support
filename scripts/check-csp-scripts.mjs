@@ -89,12 +89,12 @@ export function findViolations(html, siteOrigin) {
   // HTML コメントは実行されないので、script と同じ正規表現の選択肢として先頭から
   // 順に消費し読み飛ばす。script 本文中の "<!--" はその script が先に消費される (#144)。
   // 閉じていないコメントは仕様どおり入力末尾まで、"<!-->" / "<!--->" は空コメント。
-  // textarea / title は RCDATA で中身がテキスト扱いなので、対応する終了タグ
+  // textarea / title (RCDATA) と style (raw text) は中身がテキスト扱いなので、対応する終了タグ
   // (無ければ入力末尾) まで同様に読み飛ばす (#153)。終了タグは開始した要素名と
   // 同じものだけを対象にする (#158)。script 以外の開始タグも最後の選択肢として
   // 引用符付き属性値ごと消費し、属性値内の "<script>" を拾わない (#167)。
   const re =
-    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?<rcdata>textarea|title)\b(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?(?:<\/\k<rcdata>\s*>|$)|<script\b(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>|<[a-z][^\s/>]*(?:"[^"]*"|'[^']*'|[^'">])*>/gi;
+    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?<rcdata>textarea|title|style)\b(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?(?:<\/\k<rcdata>\s*>|$)|<script\b(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>|<[a-z][^\s/>]*(?:"[^"]*"|'[^']*'|[^'">])*>/gi;
   for (const m of html.matchAll(re)) {
     if (m.groups.attrs === undefined) continue;
     const attrs = parseAttrs(m.groups.attrs);
