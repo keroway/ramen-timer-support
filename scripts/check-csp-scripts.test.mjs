@@ -171,6 +171,23 @@ test("textarea・title は開始した要素と同名の終了タグまで読み
   );
 });
 
+test("style 内の script 文字列は対象外で、終了後の本物は検出する (#187)", () => {
+  assert.deepEqual(
+    findViolations(
+      page(`<style>/* <script>alert(1)</script> */</style>`),
+      SITE
+    ),
+    []
+  );
+  assert.equal(
+    findViolations(
+      page(`<style>/* <script>a()</script> */</style><script>b()</script>`),
+      SITE
+    ).length,
+    1
+  );
+});
+
 test("通常要素の属性値内の script 文字列は対象外で、終了後の本物は検出する (#167)", () => {
   assert.deepEqual(
     findViolations(
