@@ -70,6 +70,12 @@ const CASES = [
     expectedStderr: "@container は未対応",
   },
   {
+    name: "cta_primary_white_background_in_scope",
+    css: `${CSS_SOURCE}\n@scope (.card) {\n  .cta-primary {\n    background: #ffffff;\n    color: #fff;\n  }\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "@scope は未対応",
+  },
+  {
     name: "cta_primary_descendant_selector_white_background",
     css: `${CSS_SOURCE}\n.card .cta-primary {\n  color: #ffffff;\n  background: #ffffff;\n}\n`,
     expectedExitCode: 1,
