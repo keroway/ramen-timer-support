@@ -450,6 +450,36 @@ if (unsupported.length > 0) {
   );
 }
 
+// `a { color: #fff !important; background: #fff !important }` のような要素・全称セレクタの
+// 重要宣言は、対象クラスを含まないため上記では拾えず、CTA / skip-link の配色を詳細度に
+// 関係なく上書きする。詳細度の解決はせず、既知セレクタ以外の配色の重要宣言は
+// 解析できない上書きとして明示的に拒否する (#191)。
+function findImportantColorOverrides(source, found = []) {
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (isConditional(prelude)) {
+      findImportantColorOverrides(body, found);
+      continue;
+    }
+    if (prelude.startsWith("@")) continue;
+    const props = parseProps(body);
+    if (COLOR_PROPS.some((n) => props.get(n)?.important)) found.push(prelude);
+  }
+  return found;
+}
+
+const importantOverrides = findImportantColorOverrides(css).filter(
+  (prelude) =>
+    !prelude
+      .split(",")
+      .map((s) => s.trim())
+      .every((s) => KNOWN_SELECTORS.has(s))
+);
+if (importantOverrides.length > 0) {
+  throw new Error(
+    `既知のセレクタ以外が配色を !important で指定しています (CTA / skip-link への上書きを検査できないため拒否します): ${importantOverrides.join(", ")}`
+  );
+}
+
 if (hasFailure) {
   console.error(
     `\n白文字との対比が ${MIN_CONTRAST}:1 未満のトークン、または白文字前提に反する文字色があります。`
