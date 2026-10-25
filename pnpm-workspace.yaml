@@ -22,7 +22,7 @@ overrides:
   # GHSA-2883-xcg3-v3hh (js-yaml <=4.3.1) — maxTotalMergeKeys が空マッピングを
   # カウントしないため、空マッピングの大量マージで同種の DoS を再現できる (#96)。
   # @astrojs/internal-helpers > astro 経由 (SSG のビルド時に自リポジトリのコンテンツを読むだけ)。
-  "js-yaml@>=4.0.0 <4.3.2": ">=4.3.2 <5"
+  "js-yaml@>=4.0.0 <4.3.2": ">=4.3.2 <6"
   # GHSA-2v37-7h3g-55p8 (nanoid <3.3.17) — size=0 で customAlphabet / customRandom が
   # 無限ループする。postcss (ソースマップ用 ID 生成、size は固定) > vite > astro 経由。
   # advisory の影響範囲が 2026-08-08 に 3.3.16 まで拡大されたため追加。
