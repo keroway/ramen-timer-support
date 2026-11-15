@@ -394,6 +394,23 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "anchor_element_important_white_text_and_background",
+    css: `${CSS_SOURCE}\na {\n  color: #ffffff !important;\n  background: #ffffff !important;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "!important",
+  },
+  {
+    name: "universal_selector_important_background",
+    css: `${CSS_SOURCE}\n* {\n  background-color: #ffffff !important;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "!important",
+  },
+  {
+    name: "anchor_element_important_unrelated_declaration",
+    css: `${CSS_SOURCE}\na {\n  text-decoration: none !important;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "cta_primary_same_block_important_white_masked_by_normal",
     css: `${CSS_SOURCE}\n.cta-primary {\n  background: #ffffff !important;\n  background: var(--color-cta-bg);\n}\n`,
     expectedExitCode: 1,
