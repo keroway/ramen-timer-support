@@ -241,6 +241,22 @@ test("JavaScript の互換 MIME type のインラインと別オリジン src �
   }
 });
 
+test("textarea・title・style・script の接頭辞を持つ別要素は通常要素として扱い、後続 script を検出する (#193)", () => {
+  for (const name of [
+    "textarea-example",
+    "title-example",
+    "style-example",
+    "script-example",
+  ]) {
+    assert.equal(
+      findViolations(page(`<${name}></${name}><script>alert(1)</script>`), SITE)
+        .length,
+      1,
+      name
+    );
+  }
+});
+
 test("互換 MIME type でも同一オリジン src とデータブロックは通る (#147)", () => {
   const html = page(
     '<script type="text/javascript1.5" src="/_astro/a.js"></script><script type="application/json">{}</script>'
