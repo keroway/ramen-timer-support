@@ -503,6 +503,39 @@ if (importantOverrides.length > 0) {
   );
 }
 
+// @keyframes 内の配色変更は解析しないため、CTA / skip-link (と、それに当たりうる
+// 要素型・全称セレクタ) への animation / animation-name 指定は、背景色の上書きを
+// 見逃す経路になる。none 以外の指定は明示的に拒否する (#205)。麺・湯気など他要素の
+// アニメーションは対象外。
+function findAnimatedTargets(source, found = []) {
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (isConditional(prelude)) {
+      findAnimatedTargets(body, found);
+      continue;
+    }
+    if (prelude.startsWith("@")) continue;
+    const props = parseProps(body);
+    const animated = ["animation", "animation-name"].some(
+      (n) => props.has(n) && props.get(n).value !== "none"
+    );
+    if (!animated) continue;
+    for (const part of prelude.split(",").map((s) => s.trim())) {
+      const mentionsTarget = TARGET_CLASSES.some((c) =>
+        new RegExp(`${c.replace(".", "\\.")}(?![\\w-])`).test(part)
+      );
+      if (mentionsTarget || TYPE_SELECTOR.test(part)) found.push(part);
+    }
+  }
+  return found;
+}
+
+const animatedTargets = findAnimatedTargets(css);
+if (animatedTargets.length > 0) {
+  throw new Error(
+    `CTA / skip-link に当たりうるセレクタが animation を指定しています (キーフレーム内の配色変更を検査できないため拒否します): ${animatedTargets.join(", ")}`
+  );
+}
+
 if (hasFailure) {
   console.error(
     `\n白文字との対比が ${MIN_CONTRAST}:1 未満のトークン、または白文字前提に反する文字色があります。`
