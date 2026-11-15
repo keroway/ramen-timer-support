@@ -322,7 +322,24 @@ for (const mode of ["light", "dark"]) {
         rules.some((props) => props.custom.has(t))
       );
       const overrideOk = overridden.length === 0;
-      if (!bgOk || !colorOk || !overrideOk) hasFailure = true;
+      // background-image / all は配色を解析できない形で変えうるため、指定自体を拒否する (#199)。
+      const image = lastValue(rules, ["background-image"]);
+      const imageOk = image === undefined || image === "none";
+      const allValue = lastValue(rules, ["all"]);
+      const allOk = allValue === undefined;
+      if (!bgOk || !colorOk || !overrideOk || !imageOk || !allOk) {
+        hasFailure = true;
+      }
+      if (!imageOk) {
+        console.log(
+          `NG  ${label} ${selector} background-image ${image} (解析できない配色変更)`
+        );
+      }
+      if (!allOk) {
+        console.log(
+          `NG  ${label} ${selector} all ${allValue} (解析できない配色変更)`
+        );
+      }
       if (!overrideOk) {
         console.log(
           `NG  ${label} ${selector} ${overridden.join(", ")} を要素上で上書きしています (:root の検査値と食い違う)`
@@ -420,7 +437,13 @@ const KNOWN_SELECTORS = new Set([
   ".cta-primary:focus-visible",
   ".skip-link:focus",
 ]);
-const COLOR_PROPS = ["color", "background", "background-color"];
+const COLOR_PROPS = [
+  "color",
+  "background",
+  "background-color",
+  "background-image",
+  "all",
+];
 
 function findUnsupportedTargetRules(source, found = []) {
   for (const { prelude, body } of parseBlocks(source)) {

@@ -507,6 +507,36 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "cta_primary_background_image_white",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  background-image: linear-gradient(#ffffff, #ffffff);\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_background_image_none_safe",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  background-image: none;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
+    name: "cta_primary_all_initial",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  all: initial;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_hover_background_image_white",
+    css: `${CSS_SOURCE}\n.cta-primary:hover {\n  background-image: linear-gradient(#fff, #fff);\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "compound_selector_background_image",
+    css: `${CSS_SOURCE}\n.card .cta-primary {\n  background-image: linear-gradient(#fff, #fff);\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "element_important_all",
+    css: `${CSS_SOURCE}\na {\n  all: initial !important;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
     name: "dark_omitted_token_resolves_from_common_root",
     css: CSS_SOURCE.replace(DARK_HOVER_DECL, ""),
     expectedExitCode: 0,
