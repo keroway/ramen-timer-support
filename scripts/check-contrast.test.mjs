@@ -537,6 +537,29 @@ const CASES = [
     expectedExitCode: 1,
   },
   {
+    name: "cta_primary_animation_white_keyframes",
+    css: `${CSS_SOURCE}\n@keyframes invisible-cta {\n  from { background-color: #ffffff; }\n  to { background-color: #ffffff; }\n}\n.cta-primary {\n  animation: invisible-cta 1s infinite;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "animation を指定",
+  },
+  {
+    name: "skip_link_animation_name",
+    css: `${CSS_SOURCE}\n.skip-link:focus {\n  animation-name: steam-sway;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "animation を指定",
+  },
+  {
+    name: "element_selector_animation",
+    css: `${CSS_SOURCE}\na {\n  animation: noodle-droop 1s;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "animation を指定",
+  },
+  {
+    name: "cta_primary_animation_none_safe",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  animation: none;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "dark_omitted_token_resolves_from_common_root",
     css: CSS_SOURCE.replace(DARK_HOVER_DECL, ""),
     expectedExitCode: 0,
