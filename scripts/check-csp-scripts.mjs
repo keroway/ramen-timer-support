@@ -95,6 +95,22 @@ function collectHandlers(rawAttrs, violations) {
   }
 }
 
+// rel に stylesheet を含む link の href は style-src 'self' に従い同一オリジンのみ許可 (#215)。
+function collectStylesheet(rawAttrs, siteOrigin, violations) {
+  const attrs = parseAttrs(rawAttrs);
+  const rel = (attrs.get("rel") ?? "").toLowerCase().split(/\s+/);
+  if (!rel.includes("stylesheet")) return;
+  const href = attrs.get("href");
+  if (href === undefined) return;
+  try {
+    if (new URL(href.trim(), `${siteOrigin}/`).origin !== siteOrigin) {
+      violations.push(`別オリジンの stylesheet href は拒否されます: ${href}`);
+    }
+  } catch {
+    violations.push(`stylesheet href を解釈できません: ${href}`);
+  }
+}
+
 export function findViolations(html, siteOrigin) {
   const violations = [];
   // HTML コメントは実行されないので、script と同じ正規表現の選択肢として先頭から
@@ -111,7 +127,7 @@ export function findViolations(html, siteOrigin) {
   // style-src 'self' に反するインライン style 要素と、script-src に反する on* 属性
   // (インラインイベントハンドラー) も同じ走査で検知する (#211)。template 内は対象外。
   const re =
-    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?<rcdata>textarea|title)(?=[\s/>])(?<rcAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>[\s\S]*?(?:<\/\k<rcdata>\s*>|$)|<style(?=[\s/>])(?<styleAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>[\s\S]*?(?:<\/style\s*>|$)|<(?<tplOpen>template)(?=[\s/>])(?<tplAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>|(?<tplClose><\/template\s*>)|<script(?=[\s/>])(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>|<[a-z][^\s/>]*(?<tagAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>/gi;
+    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?<rcdata>textarea|title)(?=[\s/>])(?<rcAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>[\s\S]*?(?:<\/\k<rcdata>\s*>|$)|<style(?=[\s/>])(?<styleAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>[\s\S]*?(?:<\/style\s*>|$)|<(?<tplOpen>template)(?=[\s/>])(?<tplAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>|(?<tplClose><\/template\s*>)|<script(?=[\s/>])(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>|<(?<tagName>[a-z][^\s/>]*)(?<tagAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>/gi;
   let templateDepth = 0;
   for (const m of html.matchAll(re)) {
     const g = m.groups;
@@ -129,7 +145,11 @@ export function findViolations(html, siteOrigin) {
       continue;
     }
     if (g.rcAttrs !== undefined) collectHandlers(g.rcAttrs, violations);
-    if (g.tagAttrs !== undefined) collectHandlers(g.tagAttrs, violations);
+    if (g.tagAttrs !== undefined) {
+      collectHandlers(g.tagAttrs, violations);
+      if (g.tagName.toLowerCase() === "link")
+        collectStylesheet(g.tagAttrs, siteOrigin, violations);
+    }
     if (g.attrs === undefined) continue;
     collectHandlers(g.attrs, violations);
     const attrs = parseAttrs(g.attrs);
