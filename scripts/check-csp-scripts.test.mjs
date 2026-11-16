@@ -201,6 +201,29 @@ test("インライン style 要素を拒否する (#211)", () => {
   );
 });
 
+test("別オリジン・プロトコル相対の stylesheet 参照を拒否する (#215)", () => {
+  for (const html of [
+    '<link rel="stylesheet" href="https://example.invalid/style.css">',
+    '<link rel="stylesheet" href="//example.invalid/style.css">',
+    '<link href="https://example.invalid/style.css" rel="preload STYLESHEET">',
+    '<link rel="stylesheet" href="https&colon;//example.invalid/style.css">',
+  ]) {
+    assert.equal(findViolations(page(html), SITE).length, 1, html);
+  }
+});
+
+test("同一オリジンの stylesheet 参照と非 stylesheet の link は通る (#215)", () => {
+  for (const html of [
+    '<link rel="stylesheet" href="/styles.css">',
+    '<link rel="stylesheet" href="styles.css">',
+    `<link rel="stylesheet" href="${SITE}/styles.css">`,
+    '<link rel="icon" href="https://example.invalid/favicon.svg">',
+    '<link rel="canonical" href="https://example.invalid/">',
+  ]) {
+    assert.deepEqual(findViolations(page(html), SITE), [], html);
+  }
+});
+
 test("インラインイベントハンドラー属性を拒否する (#211)", () => {
   for (const html of [
     '<button type="button" onclick="alert(1)">Example</button>',
