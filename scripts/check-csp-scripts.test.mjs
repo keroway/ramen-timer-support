@@ -172,20 +172,56 @@ test("textarea・title は開始した要素と同名の終了タグまで読み
 });
 
 test("style 内の script 文字列は対象外で、終了後の本物は検出する (#187)", () => {
-  assert.deepEqual(
-    findViolations(
-      page(`<style>/* <script>alert(1)</script> */</style>`),
-      SITE
-    ),
-    []
+  // style 要素自体は #211 で違反になるため、スクリプト検出の数だけを確認する。
+  assert.equal(
+    findViolations(page(`<style>/* <script>alert(1)</script> */</style>`), SITE)
+      .length,
+    1
   );
   assert.equal(
     findViolations(
       page(`<style>/* <script>a()</script> */</style><script>b()</script>`),
       SITE
     ).length,
+    2
+  );
+});
+
+test("インライン style 要素を拒否する (#211)", () => {
+  assert.equal(
+    findViolations(
+      `<!doctype html><html lang="ja"><head><style>body { display: none; }</style></head><body></body></html>`,
+      SITE
+    ).length,
     1
   );
+  assert.equal(
+    findViolations(page('<style media="print">a{}</style>'), SITE).length,
+    1
+  );
+});
+
+test("インラインイベントハンドラー属性を拒否する (#211)", () => {
+  for (const html of [
+    '<button type="button" onclick="alert(1)">Example</button>',
+    "<img src=a.png onerror=alert(1)>",
+    '<a href="/" ONFOCUS="x()">Example</a>',
+    '<textarea onfocus="x()"></textarea>',
+  ]) {
+    assert.equal(findViolations(page(html), SITE).length, 1, html);
+  }
+});
+
+test("外部 CSS・data 属性・テキスト・コメント・template 内は誤検知しない (#211)", () => {
+  for (const html of [
+    '<link rel="stylesheet" href="/styles.css"><main data-onclick="x" class="onclick">Example</main>',
+    "<p>onclick=&quot;alert(1)&quot; と &lt;style&gt; の説明</p>",
+    '<!-- <style>a{}</style> <b onclick="x()"> -->',
+    '<template><style>a{}</style><b onclick="x()"></b></template>',
+    '<a href="/?x=onclick=1" title="onclick=alert(1)">Example</a>',
+  ]) {
+    assert.deepEqual(findViolations(page(html), SITE), [], html);
+  }
 });
 
 test("通常要素の属性値内の script 文字列は対象外で、終了後の本物は検出する (#167)", () => {
