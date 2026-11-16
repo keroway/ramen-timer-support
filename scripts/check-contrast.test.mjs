@@ -591,6 +591,29 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "cta_primary_filter_brightness_zero",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  filter: brightness(0);\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "filter を指定",
+  },
+  {
+    name: "skip_link_filter_grayscale",
+    css: `${CSS_SOURCE}\n.skip-link:focus {\n  filter: grayscale(1);\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "filter を指定",
+  },
+  {
+    name: "element_selector_filter",
+    css: `${CSS_SOURCE}\nbody {\n  filter: brightness(0);\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "filter を指定",
+  },
+  {
+    name: "cta_primary_filter_none_safe",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  filter: none;\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
     name: "dark_omitted_token_resolves_from_common_root",
     css: CSS_SOURCE.replace(DARK_HOVER_DECL, ""),
     expectedExitCode: 0,

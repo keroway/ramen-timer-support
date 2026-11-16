@@ -545,6 +545,38 @@ if (animatedTargets.length > 0) {
   );
 }
 
+// filter / backdrop-filter は描画後の色を変える (brightness(0) で黒潰しなど) が、
+// 配色プロパティとしては解析しないため、CTA / skip-link (と、それに当たりうる要素型・
+// 全称セレクタ) への none 以外の指定を明示的に拒否する (#212)。
+function findFilteredTargets(source, found = []) {
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (isConditional(prelude)) {
+      findFilteredTargets(body, found);
+      continue;
+    }
+    if (prelude.startsWith("@")) continue;
+    const props = parseProps(body);
+    const filtered = ["filter", "backdrop-filter"].some(
+      (n) => props.has(n) && props.get(n).value !== "none"
+    );
+    if (!filtered) continue;
+    for (const part of prelude.split(",").map((s) => s.trim())) {
+      const mentionsTarget = TARGET_CLASSES.some((c) =>
+        new RegExp(`${c.replace(".", "\\.")}(?![\\w-])`).test(part)
+      );
+      if (mentionsTarget || TYPE_SELECTOR.test(part)) found.push(part);
+    }
+  }
+  return found;
+}
+
+const filteredTargets = findFilteredTargets(css);
+if (filteredTargets.length > 0) {
+  throw new Error(
+    `CTA / skip-link に当たりうるセレクタが filter を指定しています (描画後の配色変更を検査できないため拒否します): ${filteredTargets.join(", ")}`
+  );
+}
+
 if (hasFailure) {
   console.error(
     `\n白文字との対比が ${MIN_CONTRAST}:1 未満のトークン、または白文字前提に反する文字色があります。`
