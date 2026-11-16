@@ -532,6 +532,37 @@ const CASES = [
     expectedExitCode: 1,
   },
   {
+    name: "cta_primary_text_fill_color_same_as_bg",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  -webkit-text-fill-color: #8b3d1a;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_hover_text_fill_color",
+    css: `${CSS_SOURCE}\n.cta-primary:hover {\n  -webkit-text-fill-color: #b8511f;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "cta_primary_focus_visible_text_fill_color",
+    css: `${CSS_SOURCE}\n.cta-primary:focus-visible {\n  -webkit-text-fill-color: #8b3d1a;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "skip_link_text_fill_color",
+    css: `${CSS_SOURCE}\n.skip-link {\n  -webkit-text-fill-color: #8b3d1a;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "compound_selector_text_fill_color",
+    css: `${CSS_SOURCE}\n.card .cta-primary {\n  -webkit-text-fill-color: #8b3d1a;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "未対応のセレクタ",
+  },
+  {
+    name: "element_important_text_fill_color",
+    css: `${CSS_SOURCE}\na {\n  -webkit-text-fill-color: #8b3d1a !important;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
     name: "element_important_all",
     css: `${CSS_SOURCE}\na {\n  all: initial !important;\n}\n`,
     expectedExitCode: 1,

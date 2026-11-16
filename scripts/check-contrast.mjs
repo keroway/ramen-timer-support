@@ -327,8 +327,16 @@ for (const mode of ["light", "dark"]) {
       const imageOk = image === undefined || image === "none";
       const allValue = lastValue(rules, ["all"]);
       const allOk = allValue === undefined;
-      if (!bgOk || !colorOk || !overrideOk || !imageOk || !allOk) {
+      // -webkit-text-fill-color は color を無視して文字の塗り色を変えるため、指定自体を拒否する (#208)。
+      const fill = lastValue(rules, ["-webkit-text-fill-color"]);
+      const fillOk = fill === undefined;
+      if (!bgOk || !colorOk || !overrideOk || !imageOk || !allOk || !fillOk) {
         hasFailure = true;
+      }
+      if (!fillOk) {
+        console.log(
+          `NG  ${label} ${selector} -webkit-text-fill-color ${fill} (解析できない配色変更)`
+        );
       }
       if (!imageOk) {
         console.log(
@@ -443,6 +451,7 @@ const COLOR_PROPS = [
   "background-color",
   "background-image",
   "all",
+  "-webkit-text-fill-color",
 ];
 
 function findUnsupportedTargetRules(source, found = []) {
