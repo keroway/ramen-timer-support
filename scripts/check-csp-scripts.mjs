@@ -84,6 +84,17 @@ function parseAttrs(attrs) {
   return map;
 }
 
+// on で始まる属性はインラインイベントハンドラー (onclick 等)。data-onclick は対象外。
+function collectHandlers(rawAttrs, violations) {
+  for (const name of parseAttrs(rawAttrs).keys()) {
+    if (/^on[a-z]/.test(name)) {
+      violations.push(
+        `インラインイベントハンドラー ${name} は script-src 'self' で拒否されます`
+      );
+    }
+  }
+}
+
 export function findViolations(html, siteOrigin) {
   const violations = [];
   // HTML コメントは実行されないので、script と同じ正規表現の選択肢として先頭から
@@ -97,16 +108,32 @@ export function findViolations(html, siteOrigin) {
   // "<textarea-example>" のようなハイフン付き別要素も一致してしまう (#193)。
   // template の内容は文書に挿入されるまで実行されないので、開始 / 終了タグを入れ子の
   // 深さで数え、対応する終了タグ (無ければ入力末尾) まで script を判定しない (#207)。
+  // style-src 'self' に反するインライン style 要素と、script-src に反する on* 属性
+  // (インラインイベントハンドラー) も同じ走査で検知する (#211)。template 内は対象外。
   const re =
-    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?<rcdata>textarea|title|style)(?=[\s/>])(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?(?:<\/\k<rcdata>\s*>|$)|<(?<tplOpen>template)(?=[\s/>])(?:"[^"]*"|'[^']*'|[^'">])*>|(?<tplClose><\/template\s*>)|<script(?=[\s/>])(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>|<[a-z][^\s/>]*(?:"[^"]*"|'[^']*'|[^'">])*>/gi;
+    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?<rcdata>textarea|title)(?=[\s/>])(?<rcAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>[\s\S]*?(?:<\/\k<rcdata>\s*>|$)|<style(?=[\s/>])(?<styleAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>[\s\S]*?(?:<\/style\s*>|$)|<(?<tplOpen>template)(?=[\s/>])(?<tplAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>|(?<tplClose><\/template\s*>)|<script(?=[\s/>])(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>|<[a-z][^\s/>]*(?<tagAttrs>(?:"[^"]*"|'[^']*'|[^'">])*)>/gi;
   let templateDepth = 0;
   for (const m of html.matchAll(re)) {
-    if (m.groups.tplOpen !== undefined) templateDepth += 1;
-    else if (m.groups.tplClose !== undefined)
+    const g = m.groups;
+    if (g.tplOpen !== undefined && templateDepth === 0)
+      collectHandlers(g.tplAttrs, violations);
+    if (g.tplOpen !== undefined) templateDepth += 1;
+    else if (g.tplClose !== undefined)
       templateDepth = Math.max(0, templateDepth - 1);
-    if (m.groups.attrs === undefined || templateDepth > 0) continue;
-    const attrs = parseAttrs(m.groups.attrs);
-    const body = m.groups.body;
+    if (templateDepth > 0) continue;
+    if (g.styleAttrs !== undefined) {
+      violations.push(
+        "インライン style 要素は style-src 'self' で拒否されます"
+      );
+      collectHandlers(g.styleAttrs, violations);
+      continue;
+    }
+    if (g.rcAttrs !== undefined) collectHandlers(g.rcAttrs, violations);
+    if (g.tagAttrs !== undefined) collectHandlers(g.tagAttrs, violations);
+    if (g.attrs === undefined) continue;
+    collectHandlers(g.attrs, violations);
+    const attrs = parseAttrs(g.attrs);
+    const body = g.body;
     const type = (attrs.get("type") ?? "").trim().toLowerCase();
     if (!JS_TYPES.has(type)) continue;
     const src = attrs.get("src");
