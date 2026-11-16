@@ -95,10 +95,16 @@ export function findViolations(html, siteOrigin) {
   // 引用符付き属性値ごと消費し、属性値内の "<script>" を拾わない (#167)。
   // タグ名の終端は \b ではなく空白 / "/" / ">" の先読みで判定する。\b だと
   // "<textarea-example>" のようなハイフン付き別要素も一致してしまう (#193)。
+  // template の内容は文書に挿入されるまで実行されないので、開始 / 終了タグを入れ子の
+  // 深さで数え、対応する終了タグ (無ければ入力末尾) まで script を判定しない (#207)。
   const re =
-    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?<rcdata>textarea|title|style)(?=[\s/>])(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?(?:<\/\k<rcdata>\s*>|$)|<script(?=[\s/>])(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>|<[a-z][^\s/>]*(?:"[^"]*"|'[^']*'|[^'">])*>/gi;
+    /<!--(?:-?>|[\s\S]*?(?:-->|$))|<(?<rcdata>textarea|title|style)(?=[\s/>])(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?(?:<\/\k<rcdata>\s*>|$)|<(?<tplOpen>template)(?=[\s/>])(?:"[^"]*"|'[^']*'|[^'">])*>|(?<tplClose><\/template\s*>)|<script(?=[\s/>])(?<attrs>(?:"[^"]*"|'[^']*'|[^'">])*)>(?<body>[\s\S]*?)<\/script\s*>|<[a-z][^\s/>]*(?:"[^"]*"|'[^']*'|[^'">])*>/gi;
+  let templateDepth = 0;
   for (const m of html.matchAll(re)) {
-    if (m.groups.attrs === undefined) continue;
+    if (m.groups.tplOpen !== undefined) templateDepth += 1;
+    else if (m.groups.tplClose !== undefined)
+      templateDepth = Math.max(0, templateDepth - 1);
+    if (m.groups.attrs === undefined || templateDepth > 0) continue;
     const attrs = parseAttrs(m.groups.attrs);
     const body = m.groups.body;
     const type = (attrs.get("type") ?? "").trim().toLowerCase();

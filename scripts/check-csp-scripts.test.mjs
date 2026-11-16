@@ -263,3 +263,57 @@ test("互換 MIME type でも同一オリジン src とデータブロックは�
   );
   assert.deepEqual(findViolations(html, SITE), []);
 });
+
+test("template 内の script は対象外で、終了後の本物は検出する (#207)", () => {
+  assert.deepEqual(
+    findViolations(
+      page("<template><script>alert(1)</script></template>"),
+      SITE
+    ),
+    []
+  );
+  assert.deepEqual(
+    findViolations(
+      page(
+        '<template><script src="https://example.invalid/a.js"></script></template>'
+      ),
+      SITE
+    ),
+    []
+  );
+  assert.equal(
+    findViolations(
+      page(
+        "<template><script>alert(1)</script></template><script>alert(2)</script>"
+      ),
+      SITE
+    ).length,
+    1
+  );
+});
+
+test("入れ子の template は対応する終了タグまで読み飛ばす (#207)", () => {
+  assert.deepEqual(
+    findViolations(
+      page(
+        "<template><template><script>a()</script></template><script>b()</script></template>"
+      ),
+      SITE
+    ),
+    []
+  );
+  assert.equal(
+    findViolations(
+      page("<template><template></template></template><script>c()</script>"),
+      SITE
+    ).length,
+    1
+  );
+  assert.equal(
+    findViolations(
+      page("<template-example></template-example><script>d()</script>"),
+      SITE
+    ).length,
+    1
+  );
+});
