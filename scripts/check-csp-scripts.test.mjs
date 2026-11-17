@@ -3,8 +3,65 @@
 // script を検知でき、許可すべきものは誤検知しないことを確認する。
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
-import { findViolations, readSiteOrigin } from "./check-csp-scripts.mjs";
+import {
+  checkCspPolicy,
+  extractCsp,
+  findViolations,
+  readSiteOrigin,
+} from "./check-csp-scripts.mjs";
+
+const headersCsp = () =>
+  extractCsp(
+    readFileSync(new URL("../public/_headers", import.meta.url), "utf8")
+  );
+
+test("現行の public/_headers の CSP は通る (#219)", () => {
+  assert.deepEqual(checkCspPolicy(headersCsp()), []);
+});
+
+test("CSP の緩和・削除を拒否する (#219)", () => {
+  const base = headersCsp();
+  assert.equal(
+    checkCspPolicy(
+      `${base}; x`.replace(
+        "style-src 'self'",
+        "style-src 'self' 'unsafe-inline'"
+      )
+    ).length,
+    1
+  );
+  assert.equal(
+    checkCspPolicy(
+      base.replace("script-src 'self'", "script-src 'self' 'unsafe-eval'")
+    ).length,
+    1
+  );
+  assert.equal(
+    checkCspPolicy(
+      base.replace(
+        "script-src 'self'",
+        "script-src https://cdn.example.invalid"
+      )
+    ).length,
+    1
+  );
+  assert.equal(
+    checkCspPolicy(base.replace("style-src 'self'; ", "")).length,
+    1
+  );
+  assert.equal(checkCspPolicy(null).length, 1);
+  assert.equal(checkCspPolicy("default-src 'self'").length, 2);
+});
+
+test("_headers から CSP 行を抽出する (#219)", () => {
+  assert.equal(
+    extractCsp("/*\n  Content-Security-Policy: script-src 'self'\n"),
+    "script-src 'self'"
+  );
+  assert.equal(extractCsp("/*\n  X-Frame-Options: DENY\n"), null);
+});
 
 const SITE = "https://ramentimer.keroway.com";
 const page = (body) =>
