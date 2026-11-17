@@ -235,6 +235,29 @@ test("インラインイベントハンドラー属性を拒否する (#211)", (
   }
 });
 
+test("インライン style 属性を拒否する (#217)", () => {
+  for (const html of [
+    '<main style="display: none;">Example</main>',
+    "<p STYLE=color:red>Example</p>",
+    '<textarea style="x"></textarea>',
+    '<svg style="fill:red"><path d="M0 0"/></svg>',
+  ]) {
+    assert.equal(findViolations(page(html), SITE).length, 1, html);
+  }
+});
+
+test("style 属性の説明文・類似属性・コメント・template 内は誤検知しない (#217)", () => {
+  for (const html of [
+    '<main data-style="x" class="style">Example</main>',
+    '<a href="/?x=style=1" title="style=color:red">Example</a>',
+    "<p>style=&quot;color:red&quot; の説明</p>",
+    '<!-- <b style="x"> -->',
+    '<template><b style="x"></b></template>',
+  ]) {
+    assert.deepEqual(findViolations(page(html), SITE), [], html);
+  }
+});
+
 test("外部 CSS・data 属性・テキスト・コメント・template 内は誤検知しない (#211)", () => {
   for (const html of [
     '<link rel="stylesheet" href="/styles.css"><main data-onclick="x" class="onclick">Example</main>',
