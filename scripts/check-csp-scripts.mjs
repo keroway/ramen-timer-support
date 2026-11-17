@@ -91,6 +91,11 @@ function collectHandlers(rawAttrs, violations) {
       violations.push(
         `インラインイベントハンドラー ${name} は script-src 'self' で拒否されます`
       );
+    } else if (name === "style") {
+      // style 属性も style-src 'self' で拒否される (#217)。
+      violations.push(
+        "インライン style 属性は style-src 'self' で拒否されます"
+      );
     }
   }
 }
