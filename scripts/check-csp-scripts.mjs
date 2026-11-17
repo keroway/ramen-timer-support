@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // dist/**/*.html の <script> が public/_headers の CSP (script-src 'self') に
-// 違反しないことを検証する (#130)。html-validate は HTML の整合性しか見ないため、
+// 違反しないことを検証する (#130)。あわせて _headers 自体の script-src / style-src が
+// 'self' のみであることも検証する (#219)。html-validate は HTML の整合性しか見ないため、
 // インラインスクリプトや別オリジンの src を追加しても a11y 検査が通ってしまう。
 // 許可: 同一オリジンの src 付き script / 実行されないデータブロック (type が JS 以外)。
 // CSP の script-src を変更する場合は、この検査も合わせて更新する。
@@ -39,6 +40,43 @@ export function readSiteOrigin() {
   const match = /\bsite:\s*["']([^"']+)["']/.exec(config);
   if (!match) throw new Error("astro.config.mjs の site を取得できません");
   return new URL(match[1]).origin;
+}
+
+// public/_headers の Content-Security-Policy 行を取り出す (#219)。無ければ null。
+export function extractCsp(headersText) {
+  for (const line of headersText.split(/\r?\n/)) {
+    const m = /^\s*content-security-policy\s*:\s*(.*)$/i.exec(line);
+    if (m) return m[1].trim();
+  }
+  return null;
+}
+
+// script-src / style-src が 'self' のみであることを検証する。以降の HTML 検査は
+// この前提 (同一オリジンのみ・インライン不可) をハードコードしているため、
+// _headers 側が緩められたら失敗させる。
+export function checkCspPolicy(csp) {
+  if (csp === null) {
+    return ["public/_headers に Content-Security-Policy がありません"];
+  }
+  const directives = new Map();
+  for (const part of csp.split(";")) {
+    const tokens = part.trim().split(/\s+/).filter(Boolean);
+    if (tokens.length === 0) continue;
+    const name = tokens[0].toLowerCase();
+    if (!directives.has(name)) directives.set(name, tokens.slice(1));
+  }
+  const violations = [];
+  for (const name of ["script-src", "style-src"]) {
+    const values = directives.get(name);
+    if (values === undefined) {
+      violations.push(`CSP に ${name} がありません`);
+    } else if (values.length !== 1 || values[0].toLowerCase() !== "'self'") {
+      violations.push(
+        `CSP の ${name} は 'self' のみ許可です (現在: ${values.join(" ") || "(空)"})`
+      );
+    }
+  }
+  return violations;
 }
 
 // ブラウザは属性値の文字参照を復号してから URL として解釈する。URL の判定に
@@ -194,6 +232,13 @@ function* htmlFiles(dir) {
 function main() {
   const siteOrigin = readSiteOrigin();
   let failures = 0;
+  const csp = extractCsp(
+    readFileSync(join(ROOT, "public", "_headers"), "utf8")
+  );
+  for (const v of checkCspPolicy(csp)) {
+    console.error(`public/_headers: ${v}`);
+    failures += 1;
+  }
   let count = 0;
   for (const file of htmlFiles(DIST)) {
     count += 1;
