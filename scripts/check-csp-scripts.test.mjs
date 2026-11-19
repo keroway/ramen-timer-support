@@ -55,6 +55,30 @@ test("CSP の緩和・削除を拒否する (#219)", () => {
   assert.equal(checkCspPolicy("default-src 'self'").length, 2);
 });
 
+test("要素 / 属性専用ディレクティブによる許可元の変更を拒否する (#221)", () => {
+  const base = headersCsp();
+  for (const name of [
+    "script-src-elem",
+    "style-src-elem",
+    "script-src-attr",
+    "style-src-attr",
+  ]) {
+    for (const value of [
+      "*",
+      "https://cdn.example.invalid",
+      "'unsafe-inline'",
+    ]) {
+      assert.equal(
+        checkCspPolicy(`${base}; ${name} ${value}`).length,
+        1,
+        `${name} ${value}`
+      );
+    }
+    assert.deepEqual(checkCspPolicy(`${base}; ${name} 'self'`), []);
+    assert.deepEqual(checkCspPolicy(`${base}; ${name} 'none'`), []);
+  }
+});
+
 test("_headers から CSP 行を抽出する (#219)", () => {
   assert.equal(
     extractCsp("/*\n  Content-Security-Policy: script-src 'self'\n"),
