@@ -76,6 +76,24 @@ export function checkCspPolicy(csp) {
       );
     }
   }
+  // 要素 / 属性専用ディレクティブは script-src / style-src より優先される (#221)。
+  // 存在する場合は HTML 検査の前提 (同一オリジンのみ) を超えないよう 'self' か
+  // 'none' (より厳格) に限る。
+  for (const name of [
+    "script-src-elem",
+    "style-src-elem",
+    "script-src-attr",
+    "style-src-attr",
+  ]) {
+    const values = directives.get(name);
+    if (values === undefined) continue;
+    const v = values.length === 1 ? values[0].toLowerCase() : "";
+    if (v !== "'self'" && v !== "'none'") {
+      violations.push(
+        `CSP の ${name} は 'self' または 'none' のみ許可です (現在: ${values.join(" ") || "(空)"})`
+      );
+    }
+  }
   return violations;
 }
 
