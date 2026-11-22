@@ -75,7 +75,12 @@ test("要素 / 属性専用ディレクティブによる許可元の変更を�
       );
     }
     assert.deepEqual(checkCspPolicy(`${base}; ${name} 'self'`), []);
-    assert.deepEqual(checkCspPolicy(`${base}; ${name} 'none'`), []);
+    // 要素専用の none は HTML 検査と矛盾するので拒否、属性専用は許可 (#223)
+    assert.equal(
+      checkCspPolicy(`${base}; ${name} 'none'`).length,
+      name.endsWith("-elem") ? 1 : 0,
+      `${name} 'none'`
+    );
   }
 });
 
