@@ -577,6 +577,42 @@ if (filteredTargets.length > 0) {
   );
 }
 
+// opacity は要素ごと透過・不可視にして配色検査を無効化できる (opacity: 0 など) が、
+// 配色プロパティとしては解析しないため、CTA / skip-link (と、それに当たりうる要素型・
+// 全称セレクタ) への 1 / 100% 以外の指定を明示的に拒否する (#227)。
+const OPAQUE_VALUES = new Set(["1", "1.0", "100%"]);
+
+function findTransparentTargets(source, found = []) {
+  for (const { prelude, body } of parseBlocks(source)) {
+    if (isConditional(prelude)) {
+      findTransparentTargets(body, found);
+      continue;
+    }
+    if (prelude.startsWith("@")) continue;
+    const props = parseProps(body);
+    if (
+      !props.has("opacity") ||
+      OPAQUE_VALUES.has(props.get("opacity").value)
+    ) {
+      continue;
+    }
+    for (const part of prelude.split(",").map((s) => s.trim())) {
+      const mentionsTarget = TARGET_CLASSES.some((c) =>
+        new RegExp(`${c.replace(".", "\\.")}(?![\\w-])`).test(part)
+      );
+      if (mentionsTarget || TYPE_SELECTOR.test(part)) found.push(part);
+    }
+  }
+  return found;
+}
+
+const transparentTargets = findTransparentTargets(css);
+if (transparentTargets.length > 0) {
+  throw new Error(
+    `CTA / skip-link に当たりうるセレクタが opacity を指定しています (透過込みの配色を検査できないため拒否します): ${transparentTargets.join(", ")}`
+  );
+}
+
 if (hasFailure) {
   console.error(
     `\n白文字との対比が ${MIN_CONTRAST}:1 未満のトークン、または白文字前提に反する文字色があります。`
