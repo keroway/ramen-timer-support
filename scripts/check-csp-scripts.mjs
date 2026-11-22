@@ -78,19 +78,22 @@ export function checkCspPolicy(csp) {
   }
   // 要素 / 属性専用ディレクティブは script-src / style-src より優先される (#221)。
   // 存在する場合は HTML 検査の前提 (同一オリジンのみ) を超えないよう 'self' か
-  // 'none' (より厳格) に限る。
-  for (const name of [
-    "script-src-elem",
-    "style-src-elem",
-    "script-src-attr",
-    "style-src-attr",
-  ]) {
+  // 属性専用は HTML 検査が常にインライン属性を拒否するので 'none' も許可する。
+  // 要素専用の 'none' は HTML 検査が同一オリジンの script / stylesheet を許可し続け
+  // 矛盾するため、'self' のみ許可する (#223)。
+  const allowed = {
+    "script-src-elem": ["'self'"],
+    "style-src-elem": ["'self'"],
+    "script-src-attr": ["'self'", "'none'"],
+    "style-src-attr": ["'self'", "'none'"],
+  };
+  for (const [name, ok] of Object.entries(allowed)) {
     const values = directives.get(name);
     if (values === undefined) continue;
     const v = values.length === 1 ? values[0].toLowerCase() : "";
-    if (v !== "'self'" && v !== "'none'") {
+    if (!ok.includes(v)) {
       violations.push(
-        `CSP の ${name} は 'self' または 'none' のみ許可です (現在: ${values.join(" ") || "(空)"})`
+        `CSP の ${name} は ${ok.join(" または ")} のみ許可です (現在: ${values.join(" ") || "(空)"})`
       );
     }
   }
