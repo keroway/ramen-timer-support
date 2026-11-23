@@ -654,6 +654,16 @@ const CASES = [
     ),
     expectedExitCode: 1,
   },
+  {
+    name: "root_selector_list_white_cta_override_unsafe",
+    css: `${CSS_SOURCE}\n:root, .unused {\n  --color-cta-bg: #ffffff;\n  --color-cta-bg-hover: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "root_selector_list_safe_override",
+    css: `${CSS_SOURCE}\n.unused, :root {\n  --color-cta-bg: #8b3d1a;\n}\n`,
+    expectedExitCode: 0,
+  },
 ];
 
 function runCheckContrast(cssContent) {
