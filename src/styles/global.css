@@ -84,12 +84,6 @@
   details::details-content {
     transition-duration: 0.01ms !important;
   }
-
-  .ramen-hero-steam path {
-    animation-name: none;
-    opacity: 0.42;
-    transform: none;
-  }
 }
 
 @media (prefers-contrast: more) {
@@ -425,5 +419,14 @@ code {
   100% {
     transform: translateY(-12px) translateX(-1.2px) scaleX(1.3);
     opacity: 0;
+  }
+}
+
+/* 通常の湯気ルール（opacity: 0 / animation）より後ろに置き、静止表示が上書きされないようにする */
+@media (prefers-reduced-motion: reduce) {
+  .ramen-hero-steam path {
+    animation-name: none;
+    opacity: 0.42;
+    transform: none;
   }
 }
