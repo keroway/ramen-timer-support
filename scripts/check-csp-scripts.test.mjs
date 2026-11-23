@@ -92,6 +92,31 @@ test("_headers から CSP 行を抽出する (#219)", () => {
   assert.equal(extractCsp("/*\n  X-Frame-Options: DENY\n"), null);
 });
 
+const GOOD = "script-src 'self'; style-src 'self'";
+
+test("限定パスだけの CSP は全体ポリシー欠落として拒否する (#229)", () => {
+  const csp = extractCsp(`/private/*\n  Content-Security-Policy: ${GOOD}\n`);
+  assert.equal(csp, null);
+  assert.equal(checkCspPolicy(csp).length, 1);
+});
+
+test("限定パスの後の /* の CSP を検証する (#229)", () => {
+  const csp = extractCsp(
+    `/private/*\n  Content-Security-Policy: ${GOOD}\n\n/*\n  Content-Security-Policy: script-src *; style-src *\n`
+  );
+  assert.equal(csp, "script-src *; style-src *");
+  assert.equal(checkCspPolicy(csp).length, 2);
+});
+
+test("/* より前の限定パスがあっても /* の CSP を取り出す (#229)", () => {
+  assert.equal(
+    extractCsp(
+      `/a/*\n  X-Foo: 1\n/*\n  Content-Security-Policy: ${GOOD}\n/b/*\n  Content-Security-Policy: x\n`
+    ),
+    GOOD
+  );
+});
+
 const SITE = "https://ramentimer.keroway.com";
 const page = (body) =>
   `<!doctype html><html lang="ja"><body>${body}</body></html>`;

@@ -42,9 +42,20 @@ export function readSiteOrigin() {
   return new URL(match[1]).origin;
 }
 
-// public/_headers の Content-Security-Policy 行を取り出す (#219)。無ければ null。
+// public/_headers の、全ページに適用される /* ブロックの Content-Security-Policy 行を
+// 取り出す (#219, #229)。無ければ null。インデント無しの行が適用パス、インデント付きの
+// 行がそのパスのヘッダー。限定パス (/private/* 等) の CSP は全ページを保護しないので
+// 対象外。Cloudflare Pages は複数ブロックのヘッダーを併用するため、限定パス側の CSP は
+// 全体ポリシーを緩められず、検証すべきは /* の CSP のみ。/* 内に複数あれば最初の行。
 export function extractCsp(headersText) {
+  let path = null;
   for (const line of headersText.split(/\r?\n/)) {
+    if (line.trim() === "" || line.trimStart().startsWith("#")) continue;
+    if (!/^\s/.test(line)) {
+      path = line.trim();
+      continue;
+    }
+    if (path !== "/*") continue;
     const m = /^\s*content-security-policy\s*:\s*(.*)$/i.exec(line);
     if (m) return m[1].trim();
   }
