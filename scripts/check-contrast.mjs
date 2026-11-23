@@ -133,7 +133,11 @@ function collectConditions(source, chain = [], found = new Map()) {
 // condition と一致するときだけ適用する。他セレクタの同名プロパティは混入させない (#123)。
 function applyRoots(source, mode, condition, decls, seen, depth = 0) {
   for (const { prelude, body } of parseBlocks(source)) {
-    if (prelude === ":root") {
+    // セレクタリスト (:root, .unused) 内の :root も :root への適用として扱う (#231)。
+    if (
+      !prelude.startsWith("@") &&
+      prelude.split(",").some((s) => s.trim() === ":root")
+    ) {
       seen.root = true;
       for (const [k, v] of parseDeclarations(body)) applyDecl(decls, k, v);
     } else if (isConditional(prelude)) {
