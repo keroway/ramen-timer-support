@@ -33,6 +33,8 @@ pnpm install
 pnpm run format:check
 pnpm run check
 pnpm run check:contrast
+pnpm run check:contrast:test
+pnpm run check:csp:test
 pnpm run build
 pnpm run a11y
 pnpm run preview
