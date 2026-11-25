@@ -220,6 +220,15 @@ function applyDecl(props, name, decl) {
   props.set(name, decl);
 }
 
+// 色名・関数名・16進は大文字小文字を区別しないので小文字化するが、カスタムプロパティ名
+// (--Foo) は大文字小文字を区別するため保持する。小文字化すると別変数と誤認する (#241)。
+function lowerKeepCustomProps(value) {
+  return value
+    .split(/(--[\w-]+)/)
+    .map((part, i) => (i % 2 === 1 ? part : part.toLowerCase()))
+    .join("");
+}
+
 // 通常プロパティ (color / background など) の宣言を { value, important, order } で返す。
 function parseProps(body) {
   const props = new Map();
@@ -231,10 +240,7 @@ function parseProps(body) {
     if (!name || name.startsWith("--")) continue;
     const raw = decl.slice(idx + 1);
     applyDecl(props, name, {
-      value: raw
-        .replace(/\s*!important\s*$/i, "")
-        .trim()
-        .toLowerCase(),
+      value: lowerKeepCustomProps(raw.replace(/\s*!important\s*$/i, "").trim()),
       important: /!important\s*$/i.test(raw),
       order: order++,
     });
