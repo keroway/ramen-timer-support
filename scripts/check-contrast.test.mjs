@@ -664,6 +664,31 @@ const CASES = [
     css: `${CSS_SOURCE}\n.unused, :root {\n  --color-cta-bg: #8b3d1a;\n}\n`,
     expectedExitCode: 0,
   },
+  {
+    name: "html_root_compound_white_cta_override_unsafe",
+    css: `${CSS_SOURCE}\nhtml:root {\n  --color-cta-bg: #ffffff !important;\n  --color-cta-bg-hover: #ffffff !important;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "root_compound_pseudo_white_cta_override_unsafe",
+    css: `${CSS_SOURCE}\n:root:not(.x) {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "root_compound_not_with_space_white_cta_override_unsafe",
+    css: `${CSS_SOURCE}\n:root:not(.a .b) {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "html_root_attribute_with_space_white_cta_override_unsafe",
+    css: `${CSS_SOURCE}\nhtml[data-x="a b"] {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "html_root_compound_unrelated_prop_safe",
+    css: `${CSS_SOURCE}\nhtml:root {\n  scroll-behavior: smooth;\n}\n`,
+    expectedExitCode: 0,
+  },
 ];
 
 function runCheckContrast(cssContent) {

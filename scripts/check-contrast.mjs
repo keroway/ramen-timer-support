@@ -371,6 +371,28 @@ for (const mode of ["light", "dark"]) {
 // :root の検査値と食い違ったまま CTA に継承されるため拒否する (#171)。クラス等の
 // 祖先は HTML を見ないと判定できないので対象外 (要素自身は上記 #169 で検査済み)。
 const TYPE_SELECTOR = /^(\*|[a-z][a-z0-9-]*)$/i;
+// ルート要素への複合セレクタ (html:root, :root:not(.x), html[lang] など)。単独の :root は
+// 検査値そのものなので除き、結合子を含まないものだけを対象にする (#237)。
+const ROOT_COMPOUND =
+  /^(?:html|:root)(?:[:.#[][^\s>+~]*)?$|^html(?![\w-])[^\s>+~]*$/i;
+
+// :not(.a .b) のように括弧・角括弧内に空白や結合子を含む場合も複合セレクタとして
+// 扱えるよう、内側を潰してから判定する。
+function collapseGroups(s) {
+  let prev;
+  let cur = s;
+  do {
+    prev = cur;
+    cur = cur.replace(/\([^()]*\)|\[[^[\]]*\]/g, "()");
+  } while (cur !== prev);
+  return cur;
+}
+
+function isAncestorSelector(s) {
+  if (TYPE_SELECTOR.test(s)) return true;
+  if (s.toLowerCase() === ":root") return false;
+  return ROOT_COMPOUND.test(collapseGroups(s));
+}
 
 function findAncestorOverrides(source, found = []) {
   for (const { prelude, body } of parseBlocks(source)) {
@@ -379,7 +401,7 @@ function findAncestorOverrides(source, found = []) {
       continue;
     }
     const selectors = prelude.split(",").map((s) => s.trim());
-    if (!selectors.some((s) => TYPE_SELECTOR.test(s))) continue;
+    if (!selectors.some(isAncestorSelector)) continue;
     const decls = parseDeclarations(body);
     for (const token of TOKENS) {
       if (decls.has(token)) found.push({ selector: prelude, token });
