@@ -376,8 +376,22 @@ const TYPE_SELECTOR = /^(\*|[a-z][a-z0-9-]*)$/i;
 const ROOT_COMPOUND =
   /^(?:html|:root)(?:[:.#[][^\s>+~]*)?$|^html(?![\w-])[^\s>+~]*$/i;
 
+// :not(.a .b) のように括弧・角括弧内に空白や結合子を含む場合も複合セレクタとして
+// 扱えるよう、内側を潰してから判定する。
+function collapseGroups(s) {
+  let prev;
+  let cur = s;
+  do {
+    prev = cur;
+    cur = cur.replace(/\([^()]*\)|\[[^[\]]*\]/g, "()");
+  } while (cur !== prev);
+  return cur;
+}
+
 function isAncestorSelector(s) {
-  return TYPE_SELECTOR.test(s) || (s !== ":root" && ROOT_COMPOUND.test(s));
+  if (TYPE_SELECTOR.test(s)) return true;
+  if (s.toLowerCase() === ":root") return false;
+  return ROOT_COMPOUND.test(collapseGroups(s));
 }
 
 function findAncestorOverrides(source, found = []) {

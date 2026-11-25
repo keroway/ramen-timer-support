@@ -675,6 +675,16 @@ const CASES = [
     expectedExitCode: 1,
   },
   {
+    name: "root_compound_not_with_space_white_cta_override_unsafe",
+    css: `${CSS_SOURCE}\n:root:not(.a .b) {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "html_root_attribute_with_space_white_cta_override_unsafe",
+    css: `${CSS_SOURCE}\nhtml[data-x="a b"] {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
     name: "html_root_compound_unrelated_prop_safe",
     css: `${CSS_SOURCE}\nhtml:root {\n  scroll-behavior: smooth;\n}\n`,
     expectedExitCode: 0,
