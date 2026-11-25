@@ -98,8 +98,9 @@ function parseBlocks(source) {
   return blocks;
 }
 
-const DARK_MEDIA = /^@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)$/;
-const LIGHT_MEDIA = /^@media\s*\(\s*prefers-color-scheme\s*:\s*light\s*\)$/;
+// CSS の at-rule 名・メディア特性・キーワードは大文字小文字を区別しないため /i を付ける (#239)。
+const DARK_MEDIA = /^@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)$/i;
+const LIGHT_MEDIA = /^@media\s*\(\s*prefers-color-scheme\s*:\s*light\s*\)$/i;
 
 // @media の prelude が指定モードに適用されるか。配色条件のみモードで切り分け、
 // それ以外の条件 (幅・印刷など) は呼び出し側が variant として個別に扱う (#143, #151)。
@@ -111,7 +112,7 @@ function schemeAppliesTo(prelude, mode) {
 
 // 条件付き at-rule (@media / @supports) か。@supports も条件 variant として扱う (#157)。
 function isConditional(prelude) {
-  return prelude.startsWith("@media") || prelude.startsWith("@supports");
+  return /^@(?:media|supports)(?![\w-])/i.test(prelude);
 }
 
 // 配色条件以外の @media / @supports の入れ子の連なり (外側 -> 内側の prelude 配列) を、

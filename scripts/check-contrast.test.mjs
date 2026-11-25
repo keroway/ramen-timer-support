@@ -456,6 +456,45 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "uppercase_media_root_white",
+    css:
+      `${CSS_SOURCE}\n@MEDIA (min-width: 1px) {\n  :root {\n` +
+      "    --color-cta-bg: #ffffff;\n  }\n}\n",
+    expectedExitCode: 1,
+    expectedStderr: "白文字との対比",
+  },
+  {
+    name: "uppercase_supports_root_white",
+    css:
+      `${CSS_SOURCE}\n@SUPPORTS (display: grid) {\n  :root {\n` +
+      "    --color-cta-bg: #ffffff;\n  }\n}\n",
+    expectedExitCode: 1,
+    expectedStderr: "白文字との対比",
+  },
+  {
+    name: "mixed_case_nested_media_supports_root_white",
+    css:
+      `${CSS_SOURCE}\n@Media (max-width: 600px) {\n  @Supports (display: grid) {\n    :root {\n` +
+      "      --color-cta-bg: #ffffff;\n    }\n  }\n}\n",
+    expectedExitCode: 1,
+    expectedStderr: "白文字との対比",
+  },
+  {
+    name: "uppercase_light_scheme_media_root_white",
+    css:
+      `${CSS_SOURCE}\n@MEDIA (PREFERS-COLOR-SCHEME: LIGHT) {\n  :root {\n` +
+      "    --color-cta-bg: #ffffff;\n  }\n}\n",
+    expectedExitCode: 1,
+    expectedStderr: "白文字との対比",
+  },
+  {
+    name: "uppercase_media_root_safe",
+    css:
+      `${CSS_SOURCE}\n@MEDIA (min-width: 1px) {\n  :root {\n` +
+      "    --color-cta-bg: #7a3416;\n  }\n}\n",
+    expectedExitCode: 0,
+  },
+  {
     name: "supports_root_safe",
     css:
       `${CSS_SOURCE}\n@supports (display: grid) {\n  :root {\n` +
