@@ -728,6 +728,17 @@ const CASES = [
     css: `${CSS_SOURCE}\nhtml:root {\n  scroll-behavior: smooth;\n}\n`,
     expectedExitCode: 0,
   },
+  // カスタムプロパティ名は大文字小文字を区別するため、値の小文字化で別変数と誤認しない (#241)。
+  {
+    name: "uppercase_custom_prop_white_background_reference",
+    css: `${CSS_SOURCE}\n:root {\n  --COLOR-CTA-BG: #ffffff;\n}\n.cta-primary {\n  background: var(--COLOR-CTA-BG);\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "uppercase_function_name_keeps_token_reference",
+    css: `${CSS_SOURCE}\n.cta-primary {\n  background: VAR(--color-cta-bg);\n}\n`,
+    expectedExitCode: 0,
+  },
 ];
 
 function runCheckContrast(cssContent) {
