@@ -510,3 +510,38 @@ test("入れ子の template は対応する終了タグまで読み飛ばす (#2
     1
   );
 });
+
+test("a / area の javascript: URL を拒否する (#243)", () => {
+  for (const href of [
+    "javascript:alert(1)",
+    "JavaScript:alert(1)",
+    "  javascript:alert(1)",
+    "java&Tab;script:alert(1)",
+    "javascript&colon;alert(1)",
+    "&#106;avascript:alert(1)",
+  ]) {
+    assert.equal(
+      findViolations(page(`<a href="${href}">x</a>`), SITE).length,
+      1,
+      href
+    );
+  }
+  assert.equal(
+    findViolations(page('<area href="javascript:void(0)">'), SITE).length,
+    1
+  );
+});
+
+test("通常の https / 相対 / mailto リンクと template 内は通る (#243)", () => {
+  for (const html of [
+    '<a href="https://example.com/">x</a>',
+    '<a href="/privacy/">x</a>',
+    '<a href="#top">x</a>',
+    '<a href="mailto:support@example.com">x</a>',
+    '<a href="/javascript:foo">x</a>',
+    "<p>javascript:alert(1) の説明</p>",
+    '<template><a href="javascript:x()">x</a></template>',
+  ]) {
+    assert.deepEqual(findViolations(page(html), SITE), [], html);
+  }
+});

@@ -186,6 +186,22 @@ function collectStylesheet(rawAttrs, siteOrigin, violations) {
   }
 }
 
+// a / area の href が javascript: URL なら script-src 'self' で拒否される (#243)。
+// URL パーサーは先頭の C0 制御文字・空白を除去し、タブ / 改行を全て取り除くので同じ正規化をする。
+function collectJavascriptUrl(rawAttrs, violations) {
+  const href = parseAttrs(rawAttrs).get("href");
+  if (href === undefined) return;
+  const normalized = href
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: URL 仕様の C0 制御文字除去
+    .replace(/^[\u0000- ]+/, "")
+    .replace(/[\t\n\r]/g, "");
+  if (/^javascript:/i.test(normalized)) {
+    violations.push(
+      `javascript: URL の href は script-src 'self' で拒否されます: ${href}`
+    );
+  }
+}
+
 export function findViolations(html, siteOrigin) {
   const violations = [];
   // HTML コメントは実行されないので、script と同じ正規表現の選択肢として先頭から
@@ -222,8 +238,10 @@ export function findViolations(html, siteOrigin) {
     if (g.rcAttrs !== undefined) collectHandlers(g.rcAttrs, violations);
     if (g.tagAttrs !== undefined) {
       collectHandlers(g.tagAttrs, violations);
-      if (g.tagName.toLowerCase() === "link")
-        collectStylesheet(g.tagAttrs, siteOrigin, violations);
+      const tag = g.tagName.toLowerCase();
+      if (tag === "link") collectStylesheet(g.tagAttrs, siteOrigin, violations);
+      else if (tag === "a" || tag === "area")
+        collectJavascriptUrl(g.tagAttrs, violations);
     }
     if (g.attrs === undefined) continue;
     collectHandlers(g.attrs, violations);
