@@ -401,23 +401,52 @@ function isAncestorSelector(s) {
   return ROOT_COMPOUND.test(collapseGroups(s));
 }
 
-function findAncestorOverrides(source, found = []) {
+// 背景トークンが var() で辿る参照先のカスタムプロパティ名も、トークン自身と同様に
+// 祖先経由の上書きから守る必要がある (#245)。全モード・全条件の宣言から集める。
+// 兄弟の @media / @supports が同時成立したときだけ繋がる参照も拾えるよう、全 variant の
+// 参照の辺を合算したグラフで、トークンから到達できる名前の閉包を取る。
+function collectWatchedProps(allModes) {
+  const edges = new Map();
+  for (const { decls } of allModes) {
+    for (const [name, { value }] of decls) {
+      if (!value.startsWith("var(")) continue;
+      if (!edges.has(name)) edges.set(name, new Set());
+      edges.get(name).add(value.slice(4, -1).trim());
+    }
+  }
+  const watched = new Set(TOKENS);
+  const queue = [...TOKENS];
+  while (queue.length > 0) {
+    for (const next of edges.get(queue.pop()) ?? []) {
+      if (!watched.has(next)) {
+        watched.add(next);
+        queue.push(next);
+      }
+    }
+  }
+  return watched;
+}
+
+function findAncestorOverrides(source, watched, found = []) {
   for (const { prelude, body } of parseBlocks(source)) {
     if (isConditional(prelude)) {
-      findAncestorOverrides(body, found);
+      findAncestorOverrides(body, watched, found);
       continue;
     }
     const selectors = prelude.split(",").map((s) => s.trim());
     if (!selectors.some(isAncestorSelector)) continue;
     const decls = parseDeclarations(body);
-    for (const token of TOKENS) {
+    for (const token of watched) {
       if (decls.has(token)) found.push({ selector: prelude, token });
     }
   }
   return found;
 }
 
-for (const { selector, token } of findAncestorOverrides(css)) {
+for (const { selector, token } of findAncestorOverrides(
+  css,
+  collectWatchedProps(modes)
+)) {
   hasFailure = true;
   console.log(
     `NG  ${selector} が ${token} を上書きしています (祖先経由で継承され :root の検査値と食い違う)`
