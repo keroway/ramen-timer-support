@@ -403,18 +403,24 @@ function isAncestorSelector(s) {
 
 // 背景トークンが var() で辿る参照先のカスタムプロパティ名も、トークン自身と同様に
 // 祖先経由の上書きから守る必要がある (#245)。全モード・全条件の宣言から集める。
+// 兄弟の @media / @supports が同時成立したときだけ繋がる参照も拾えるよう、全 variant の
+// 参照の辺を合算したグラフで、トークンから到達できる名前の閉包を取る。
 function collectWatchedProps(allModes) {
-  const watched = new Set(TOKENS);
+  const edges = new Map();
   for (const { decls } of allModes) {
-    for (const token of TOKENS) {
-      let current = decls.get(token)?.value ?? "";
-      const visited = new Set();
-      while (current.startsWith("var(")) {
-        const name = current.slice(4, -1).trim();
-        if (visited.has(name)) break;
-        visited.add(name);
-        watched.add(name);
-        current = decls.get(name)?.value ?? "";
+    for (const [name, { value }] of decls) {
+      if (!value.startsWith("var(")) continue;
+      if (!edges.has(name)) edges.set(name, new Set());
+      edges.get(name).add(value.slice(4, -1).trim());
+    }
+  }
+  const watched = new Set(TOKENS);
+  const queue = [...TOKENS];
+  while (queue.length > 0) {
+    for (const next of edges.get(queue.pop()) ?? []) {
+      if (!watched.has(next)) {
+        watched.add(next);
+        queue.push(next);
       }
     }
   }

@@ -744,6 +744,12 @@ const CASES = [
     css: `${CSS_SOURCE}\nhtml:root {\n  --unrelated: #ffffff;\n}\n`,
     expectedExitCode: 0,
   },
+  // 兄弟の @media / @supports が同時成立したときだけ繋がる参照先の上書きも拒否する (#245)。
+  {
+    name: "html_root_override_of_var_chained_across_sibling_conditions_unsafe",
+    css: `${CSS_SOURCE}\n:root {\n  --color-cta-bg: var(--color-accent);\n  --color-accent: #8b3d1a;\n  --contrast-chain: #8b3d1a;\n  --contrast-leaf: #8b3d1a;\n}\n@media (min-width: 1px) {\n  :root {\n    --color-accent: var(--contrast-chain);\n  }\n}\n@supports (display: grid) {\n  :root {\n    --contrast-chain: var(--contrast-leaf);\n  }\n}\nhtml:root {\n  --contrast-leaf: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
   // カスタムプロパティ名は大文字小文字を区別するため、値の小文字化で別変数と誤認しない (#241)。
   {
     name: "uppercase_custom_prop_white_background_reference",
