@@ -728,6 +728,22 @@ const CASES = [
     css: `${CSS_SOURCE}\nhtml:root {\n  scroll-behavior: smooth;\n}\n`,
     expectedExitCode: 0,
   },
+  // 背景トークンの参照先変数 (--color-accent) の祖先経由上書きも拒否する (#245)。
+  {
+    name: "html_root_compound_white_referenced_var_override_unsafe",
+    css: `${CSS_SOURCE}\nhtml:root {\n  --color-accent: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "body_white_referenced_var_override_unsafe",
+    css: `${CSS_SOURCE}\nbody {\n  --color-accent: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "html_root_compound_unrelated_custom_prop_safe",
+    css: `${CSS_SOURCE}\nhtml:root {\n  --unrelated: #ffffff;\n}\n`,
+    expectedExitCode: 0,
+  },
   // カスタムプロパティ名は大文字小文字を区別するため、値の小文字化で別変数と誤認しない (#241)。
   {
     name: "uppercase_custom_prop_white_background_reference",
