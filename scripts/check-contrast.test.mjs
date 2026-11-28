@@ -778,6 +778,17 @@ const CASES = [
     expectedExitCode: 0,
   },
   {
+    name: "content_string_with_crlf_line_continuation_is_safe",
+    css: `${CSS_SOURCE}\n.unrelated::after {\n  content: "a\\\r\n@layer";\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
+    name: "at_layer_after_escaped_quote_outside_string_still_rejected",
+    css: `${CSS_SOURCE}\n.a\\" {\n  color: #000;\n}\n@layer regression {\n  .cta-primary {\n    color: black !important;\n  }\n}\n.b\\" {\n  color: #000;\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "@layer は未対応",
+  },
+  {
     name: "at_layer_after_content_string_still_rejected",
     css: `${CSS_SOURCE}\n.unrelated::after {\n  content: "x";\n}\n@layer regression {\n  .cta-primary {\n    color: black !important;\n  }\n}\n`,
     expectedExitCode: 1,
