@@ -47,7 +47,9 @@ const currentPath = Astro.url.pathname.replace(/(?!^)\/$/, "");
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
-    <a href="#main" class="skip-link">本文へスキップ</a>
+    <a href="#main" class="skip-link">
+      本文へスキップ
+    </a>
     <header class="site-header">
       <a href="/">
         <strong>まてた！ラーメンタイマー</strong>
@@ -58,10 +60,12 @@ const currentPath = Astro.url.pathname.replace(/(?!^)\/$/, "");
     </main>
     <footer class="site-footer">
       <nav aria-label="サイト内リンク" class="site-nav">
-        <a href="/" aria-current={currentPath === "/" ? "page" : undefined}>サポート</a>
-        <a href="/privacy" aria-current={currentPath === "/privacy" ? "page" : undefined}
-          >プライバシーポリシー</a
-        >
+        <a href="/" aria-current={currentPath === "/" ? "page" : undefined}>
+          サポート
+        </a>
+        <a href="/privacy" aria-current={currentPath === "/privacy" ? "page" : undefined}>
+          プライバシーポリシー
+        </a>
       </nav>
       <p>&copy; {new Date().getFullYear()} keroway</p>
     </footer>
