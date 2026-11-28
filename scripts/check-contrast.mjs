@@ -84,14 +84,15 @@ function parseBlocks(source) {
   for (let i = 0; i < source.length; i += 1) {
     const ch = source[i];
     if (ch === "\\") {
-      i += 1;
+      i += source.startsWith("\r\n", i + 1) ? 2 : 1;
       continue;
     }
     if (ch === '"' || ch === "'") {
       // 閉じ引用符まで読み飛ばす。未終端の文字列は改行で終わる (CSS の bad-string)。
+      // バックスラッシュ + CRLF は 1 つの行継続として消費する。
       for (i += 1; i < source.length; i += 1) {
         const c = source[i];
-        if (c === "\\") i += 1;
+        if (c === "\\") i += source.startsWith("\r\n", i + 1) ? 2 : 1;
         else if (c === ch || c === "\n") break;
       }
       continue;

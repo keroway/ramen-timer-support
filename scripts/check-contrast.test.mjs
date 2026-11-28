@@ -811,6 +811,11 @@ const CASES = [
     expectedExitCode: 1,
   },
   {
+    name: "white_cta_bg_after_crlf_line_continuation_and_brace_still_rejected",
+    css: `${CSS_SOURCE}\n.example::before {\n  content: "a\\\r\n{";\n}\n:root {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
     name: "white_cta_bg_after_escaped_quote_and_brace_still_rejected",
     css: `${CSS_SOURCE}\n.example::before {\n  content: "\\" }";\n}\n:root {\n  --color-cta-bg: #ffffff;\n}\n`,
     expectedExitCode: 1,
