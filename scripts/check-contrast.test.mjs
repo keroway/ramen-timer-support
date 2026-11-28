@@ -761,6 +761,28 @@ const CASES = [
     css: `${CSS_SOURCE}\n.cta-primary {\n  background: VAR(--color-cta-bg);\n}\n`,
     expectedExitCode: 0,
   },
+  // content 文字列中の @layer / @container / @scope は at-rule ではないため拒否しない (#247)。
+  {
+    name: "content_string_with_layer_is_safe",
+    css: `${CSS_SOURCE}\n.unrelated::after {\n  content: "@layer";\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
+    name: "content_string_with_container_is_safe",
+    css: `${CSS_SOURCE}\n.unrelated::after {\n  content: '@container';\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
+    name: "content_string_with_scope_is_safe",
+    css: `${CSS_SOURCE}\n.unrelated::after {\n  content: "a \\" @scope";\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
+    name: "at_layer_after_content_string_still_rejected",
+    css: `${CSS_SOURCE}\n.unrelated::after {\n  content: "x";\n}\n@layer regression {\n  .cta-primary {\n    color: black !important;\n  }\n}\n`,
+    expectedExitCode: 1,
+    expectedStderr: "@layer は未対応",
+  },
 ];
 
 function runCheckContrast(cssContent) {

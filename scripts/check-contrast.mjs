@@ -453,9 +453,16 @@ for (const { selector, token } of findAncestorOverrides(
   );
 }
 
+// 未対応 at-rule の検知は、content: "@layer" のような文字列リテラル内の語を
+// 誤検知しないよう、文字列を除いたコピーに対して行う (#247)。
+const cssWithoutStrings = css.replace(
+  /"(?:[^"\\\n]|\\[\s\S])*"|'(?:[^'\\\n]|\\[\s\S])*'/g,
+  '""'
+);
+
 // @layer はレイヤー順によるカスケードを解析しておらず、内側の宣言を黙って無視して
 // しまうため、未対応構文として明示的に失敗させる (#175)。
-if (/@layer\b/i.test(css)) {
+if (/@layer\b/i.test(cssWithoutStrings)) {
   throw new Error(
     "@layer は未対応です (レイヤー内の上書きを検査できないため拒否します)"
   );
@@ -463,7 +470,7 @@ if (/@layer\b/i.test(css)) {
 
 // @container も同様に、コンテナ条件内の配色変更を解析できず黙って無視してしまうため、
 // 未対応構文として明示的に失敗させる (#182)。
-if (/@container\b/i.test(css)) {
+if (/@container\b/i.test(cssWithoutStrings)) {
   throw new Error(
     "@container は未対応です (コンテナ条件内の上書きを検査できないため拒否します)"
   );
@@ -471,7 +478,7 @@ if (/@container\b/i.test(css)) {
 
 // @scope もスコープ解決を行わず内側の配色変更を黙って無視してしまうため、
 // 未対応構文として明示的に失敗させる (#188)。
-if (/@scope\b/i.test(css)) {
+if (/@scope\b/i.test(cssWithoutStrings)) {
   throw new Error(
     "@scope は未対応です (スコープ内の上書きを検査できないため拒否します)"
   );
