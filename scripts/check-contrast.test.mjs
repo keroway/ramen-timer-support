@@ -794,6 +794,27 @@ const CASES = [
     expectedExitCode: 1,
     expectedStderr: "@layer は未対応",
   },
+  // content 文字列中の波括弧はブロック境界ではないため、後続の配色違反を見逃さない (#250)。
+  {
+    name: "content_string_with_close_brace_is_safe",
+    css: `${CSS_SOURCE}\n.example::before {\n  content: "}";\n}\n`,
+    expectedExitCode: 0,
+  },
+  {
+    name: "white_cta_bg_after_content_close_brace_still_rejected",
+    css: `${CSS_SOURCE}\n.example::before {\n  content: "}";\n}\n:root {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "white_cta_bg_after_content_open_brace_still_rejected",
+    css: `${CSS_SOURCE}\n.example::before {\n  content: '{';\n}\n:root {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
+  {
+    name: "white_cta_bg_after_escaped_quote_and_brace_still_rejected",
+    css: `${CSS_SOURCE}\n.example::before {\n  content: "\\" }";\n}\n:root {\n  --color-cta-bg: #ffffff;\n}\n`,
+    expectedExitCode: 1,
+  },
 ];
 
 function runCheckContrast(cssContent) {

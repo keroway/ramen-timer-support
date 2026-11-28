@@ -73,6 +73,8 @@ function resolve(decls, value) {
 }
 
 // 波括弧のネストを考慮して { prelude, body } の列を出現順に返す。
+// 文字列リテラル ("}" や '{' など) とバックスラッシュエスケープ内の波括弧は
+// ブロック境界として数えない (#250)。
 function parseBlocks(source) {
   const blocks = [];
   let depth = 0;
@@ -81,6 +83,19 @@ function parseBlocks(source) {
   let prelude = "";
   for (let i = 0; i < source.length; i += 1) {
     const ch = source[i];
+    if (ch === "\\") {
+      i += 1;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      // 閉じ引用符まで読み飛ばす。未終端の文字列は改行で終わる (CSS の bad-string)。
+      for (i += 1; i < source.length; i += 1) {
+        const c = source[i];
+        if (c === "\\") i += 1;
+        else if (c === ch || c === "\n") break;
+      }
+      continue;
+    }
     if (ch === "{") {
       if (depth === 0) {
         prelude = source.slice(start, i).trim();
